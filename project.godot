@@ -10,10 +10,15 @@ config_version=5
 
 [application]
 
-config/name="grapel rage game"
+config/name="Grapple rage game"
 run/main_scene="uid://b6tkww38cm8fi"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
 
 [dotnet]
 
