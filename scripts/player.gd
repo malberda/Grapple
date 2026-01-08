@@ -23,20 +23,23 @@ extends CharacterBody2D
 @export var air_accel := 1200.0
 @export var friction := 1800.0
 @export var gravity := 1500.0
-@export var jump_velocity := -420.0
+@export var jump_velocity := -820.0
 @export var jump_cut_multiplier := 0.35
+@export var latch_jump_enabled := true
+
+
 
 
 # --------------------
 # GRAPPLE
 # --------------------
-@export var grapple_pull_strength := 3200.0
+@export var grapple_pull_strength := 2000.0
 @export var grapple_damping := 0.99
 @export var max_grapple_distance := 900.0
 @export var latch_distance := 40
 @export var max_rope_length := 400.0
 var coyote_time = .1  #coyote timing for jump
-
+var valid_grapple_point: Variant
 
 # --------------------
 # GENERAL USE
@@ -58,7 +61,7 @@ func _ready():
 # INPUT
 # --------------------
 func _input(event):
-	if event.is_action_released('jump') and velocity.y < 0:
+	if event.is_action_pressed('jump') and velocity.y < 0:
 		velocity.y *= jump_cut_multiplier
 	
 	if event.is_action_pressed("grapple"):
@@ -70,6 +73,17 @@ func _input(event):
 	if event.is_action_released("grapple"):
 		release_grapple()
 		grapple_requested = false
+
+func _draw():
+	if !is_latched and !is_grappling:
+		if valid_grapple_point != null:
+			draw_line(Vector2.ZERO, valid_grapple_point, Color(1, 1, 1, 0.5), 3.0)
+			# Optional: draw a circle at the grapple point for visual feedback
+			draw_circle(valid_grapple_point, 6.0, Color(0, 1, 0, 0.8))
+		else:
+			# Optionally draw a faint line to the max distance when no collision
+			var max_point = grapple_ray.target_position
+			draw_line(Vector2.ZERO, max_point, Color(1, 1, 1, 0.2), 2.0)
 
 # --------------------
 # PHYSICS LOOP
@@ -87,7 +101,7 @@ func _physics_process(delta):
 
 	if is_latched:
 		velocity = Vector2.ZERO  # stick to wall
-		if Input.is_action_just_pressed("jump"):
+		if Input.is_action_just_pressed("jump") and latch_jump_enabled:
 			release_grapple()
 			velocity.y = jump_velocity
 	elif is_grappling:
@@ -123,7 +137,32 @@ func apply_movement(delta):
 # --------------------
 func update_grapple_ray():
 	var mouse_local := to_local(get_global_mouse_position())
-	grapple_ray.target_position = mouse_local.normalized() * max_grapple_distance
+	var direction := mouse_local.normalized()
+	
+	# Always point the ray in the mouse direction, clamped to max distance
+	grapple_ray.target_position = direction * max_grapple_distance
+	
+	# Force the ray to update its collision immediately
+	grapple_ray.force_raycast_update()
+	
+	# Check if there's a valid collision
+	if grapple_ray.is_colliding():
+		var collision_point: Vector2 = grapple_ray.get_collision_point()
+		var grapple_point_local := to_local(collision_point)
+		var distance_to_collision := grapple_point_local.length()
+		
+		# Only draw the line if the collision is within max_grapple_distance
+		if distance_to_collision <= max_rope_length and can_grapple(collision_point):
+			# Store the valid grapple point for use elsewhere (optional)
+			valid_grapple_point = grapple_point_local  # or global if preferred
+			
+			# Trigger a redraw to show the line to the collision point
+			queue_redraw()  # Godot 4.x
+			return
+	
+	# No valid grapple point – clear the drawing
+	valid_grapple_point = null
+	queue_redraw() # or queue_redraw()
 
 func try_start_grapple():
 	grapple_ray.force_raycast_update()
@@ -131,15 +170,35 @@ func try_start_grapple():
 	if not grapple_ray.is_colliding():
 		return
 		
-	var point = grapple_ray.get_collision_point()
+	var collision_point = grapple_ray.get_collision_point()
 	
-	if global_position.distance_to(point) > max_rope_length:
+	if global_position.distance_to(collision_point) > max_rope_length or !can_grapple(collision_point):
 		return
 
 	grapple_point = grapple_ray.get_collision_point()
 	is_grappling = true
+	
+func can_grapple(collision_point: Vector2):
+	var collider = grapple_ray.get_collider()
+	var mouse_local := to_local(get_global_mouse_position())
+	var direction := mouse_local.normalized()
+	if collider is TileMapLayer:
+		# Need to offset the point in the direction the grapple ray is facing
+		# otherwise it will not register the tile when aiming at the bottom
+		# of a platform
+		var offset_point := collision_point + direction * 0.01
+		
+		var local_point = collider.to_local(offset_point)
+		var tile_coords = collider.local_to_map(local_point)
+		var tile_data = collider.get_cell_tile_data(tile_coords)
+		# Check Custom Data Layer "Grappleable" (must be defined in TileSet)
+		if tile_data and tile_data.has_custom_data("Grappleable") and tile_data.get_custom_data("Grappleable"):
+			return true
+	
+	return false
 
 func apply_grapple_physics(delta):
+	var input_x := Input.get_axis("left", "right")
 	var to_hook := grapple_point - global_position
 	var dist := to_hook.length()
 
@@ -152,6 +211,9 @@ func apply_grapple_physics(delta):
 	
 	if dist > max_rope_length:
 		global_position = grapple_point - dir * max_rope_length
+		
+	if input_x != 0:
+		velocity.x += input_x * 4
 		
 	velocity += dir * grapple_pull_strength * delta
 	velocity *= grapple_damping

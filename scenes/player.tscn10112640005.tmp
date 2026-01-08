@@ -24,6 +24,18 @@ points = PackedVector2Array(-48.437466, 141.65431, -48.437466, -33.330433, -23.4
 [node name="CharacterBody2D" type="CharacterBody2D"]
 script = ExtResource("1_g2els")
 run_speed = 230.165
+accel = null
+air_accel = null
+friction = null
+gravity = null
+jump_velocity = null
+jump_cut_multiplier = null
+latch_jump_enabled = null
+grapple_pull_strength = null
+grapple_damping = null
+max_grapple_distance = null
+latch_distance = null
+max_rope_length = null
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(0.16000122, 0.16000122)
@@ -38,3 +50,12 @@ target_position = Vector2(0, -1000)
 position = Vector2(-0.50000024, 6.0000005)
 scale = Vector2(0.32000023, 0.12001046)
 shape = SubResource("ConvexPolygonShape2D_g2els")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(-0.50000024, 6.0000005)
+scale = Vector2(0.32000023, 0.12001046)
+shape = SubResource("ConvexPolygonShape2D_g2els")
+
+[connection signal="body_shape_entered" from="Area2D" to="." method="_on_area_2d_body_shape_entered"]
