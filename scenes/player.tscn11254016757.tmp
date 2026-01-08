@@ -1,0 +1,68 @@
+[gd_scene load_steps=6 format=3 uid="uid://f6t5osam8m6x"]
+
+[ext_resource type="Script" uid="uid://bxb2418ihrr3t" path="res://scripts/player.gd" id="1_g2els"]
+[ext_resource type="Texture2D" uid="uid://kyu0sm7bps6s" path="res://sprites/maxresdefault.jpg" id="1_lj8jo"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dn4c7"]
+atlas = ExtResource("1_lj8jo")
+region = Rect2(426, 0, 213, 360)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_4vejd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dn4c7")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_g2brh"]
+radius = 40.624973
+height = 433.2956
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+script = ExtResource("1_g2els")
+hook_speed = null
+hook_return_speed = null
+camera_pull_strength = null
+camera_pull_smoothing = null
+max_camera_offset = null
+run_speed = 230.165
+accel = null
+air_accel = null
+friction = null
+gravity = null
+jump_velocity = null
+jump_cut_multiplier = null
+grapple_pull_strength = null
+grapple_damping = null
+max_grapple_distance = null
+latch_distance = null
+max_rope_length = null
+airdash_speed = null
+airdash_time = null
+airdash_cooldown = null
+rocket_boost_strength = null
+rocket_boost_duration = null
+
+[node name="Grapple" type="Node2D" parent="."]
+
+[node name="Rope" type="Line2D" parent="Grapple"]
+
+[node name="GrappleRay" type="RayCast2D" parent="Grapple"]
+target_position = Vector2(0, -1000)
+
+[node name="AimLine" type="Line2D" parent="Grapple"]
+width = 1.5
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.16000122, 0.16000122)
+sprite_frames = SubResource("SpriteFrames_4vejd")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(0.32000023, 0.12001046)
+shape = SubResource("CapsuleShape2D_g2brh")
+
+[node name="Camera" type="Camera2D" parent="."]

@@ -21,10 +21,10 @@ extends CharacterBody2D
 var grappleUnlocked = true
 var grapplePullUnlocked = false
 var rocketBoostUnlocked = true
-var airdashUnlocked = false
-var doubleJumpUnlocked = false
-var doubleHookUnlocked = false
-var latchJumpUnlocked = false
+var airdashUnlocked = true
+var doubleJumpUnlocked = true
+var doubleHookUnlocked = true
+var latchJumpUnlocked = true
 enum GrappleState {
 	IDLE,
 	FIRING,
@@ -73,6 +73,8 @@ var rope_length := 0.0
 var rope_pivot: Vector2
 var has_pivot := false
 
+@onready var airdash_helper = preload("res://scripts/airdash.gd").new()
+@onready var rocket_boost_helper = preload("res://scripts/rocket_boost.gd").new()
 
 # --------------------
 # GENERAL USE
@@ -82,13 +84,6 @@ var is_grappling := false
 var grapple_point: Vector2
 var grapple_requested := false
 var coyote_timer = 0.0
-
-# --------------------
-# ROCKET BOOST
-# --------------------
-@export var rocket_boost_strength := 1800.0  # tweak for speediness
-@export var rocket_boost_duration := 0.2     # seconds of boost
-var rocket_boost_timer := 0.0
 
 
 # --------------------
@@ -117,6 +112,17 @@ func _input(event):
 	if event.is_action_pressed("6"):
 		latchJumpUnlocked = !latchJumpUnlocked
 		
+	if event.is_action_pressed("airDash") and airdashUnlocked and airdash_helper.can_airdash:# and not is_on_floor():
+		var input_dir = Vector2(
+			Input.get_axis("left", "right"),
+			Input.get_axis("up", "down")
+		)
+		if input_dir == Vector2.ZERO:
+			input_dir.x = airdash_helper.last_input_x # default 1/-1
+		airdash_helper.airdash_direction = input_dir.normalized()
+		airdash_helper.airdash_timer = airdash_helper.airdash_time
+		airdash_helper.can_airdash = false
+
 	
 	if event.is_action_released('jump') and velocity.y < 0:
 		velocity.y *= jump_cut_multiplier
@@ -137,6 +143,8 @@ func _input(event):
 # PHYSICS LOOP
 # --------------------
 func _physics_process(delta):
+	if is_on_floor():
+		airdash_helper.can_airdash = true
 	update_grapple(delta)
 	update_grapple_ray()
 	if is_on_floor():
@@ -146,7 +154,12 @@ func _physics_process(delta):
 		
 	# Only when grappled and rocket boost unlocked
 	if is_grappling and Input.is_action_just_pressed("rocketBoost") and rocketBoostUnlocked:
-		rocket_boost_timer = rocket_boost_duration
+		rocket_boost_helper.rocket_boost_timer = rocket_boost_helper.rocket_boost_duration
+
+	# Apply airdash if active
+	if airdash_helper.airdash_timer > 0:
+		velocity = airdash_helper.airdash_direction * airdash_helper.airdash_speed
+		airdash_helper.airdash_timer -= delta
 
 
 
@@ -170,7 +183,8 @@ func _physics_process(delta):
 # --------------------
 func apply_movement(delta):
 	var input_x := Input.get_axis("left", "right")
-
+	if input_x != 0:
+		airdash_helper.last_input_x = sign(input_x)
 	var target_speed := input_x * run_speed
 	var current_accel := accel if is_on_floor() else air_accel
 
@@ -264,6 +278,7 @@ func update_return(delta):
 	hook_position += hook_velocity * delta
 
 func fire_grapple():
+	rocket_boost_helper.rocket_boost_used = false
 	grapple_state = GrappleState.FIRING
 
 	hook_position = global_position
@@ -304,16 +319,15 @@ func apply_grapple_physics(delta):
 	var tangent1 := Vector2(-dir.y, dir.x)
 	var tangent2 := Vector2(dir.y, -dir.x)
 
-	var tangential_speed1 := velocity.dot(tangent1)
-	var tangential_speed2 := velocity.dot(tangent2)
-	var tangent := tangent1 if abs(tangential_speed1) > abs(tangential_speed2) else tangent2
+	var tangent = tangent1 if velocity.dot(tangent1) > velocity.dot(tangent2) else tangent2
 
 	# Apply rocket boost if active
-	if rocket_boost_timer > 0:
-
-		var boost = tangent * rocket_boost_strength
+	if rocket_boost_helper.rocket_boost_timer > 0 and not rocket_boost_helper.rocket_boost_used:
+		var boost = tangent * rocket_boost_helper.rocket_boost_strength
 		velocity += boost * delta
-		rocket_boost_timer -= delta
+		rocket_boost_helper.rocket_boost_timer -= delta
+		rocket_boost_helper.rocket_boost_used = true
+
 
 	# --- LATCH ---
 	if dist <= latch_distance:
@@ -323,7 +337,6 @@ func apply_grapple_physics(delta):
 		return
 		
 	if grapplePullUnlocked:
-		
 		if dist > max_rope_length:
 			global_position = grapple_point - dir * max_rope_length
 			
