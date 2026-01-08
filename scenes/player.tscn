@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://f6t5osam8m6x"]
+
+[ext_resource type="Script" uid="uid://bxb2418ihrr3t" path="res://scenes/player.gd" id="1_g2els"]
+[ext_resource type="Texture2D" uid="uid://kyu0sm7bps6s" path="res://sprites/maxresdefault.jpg" id="1_lj8jo"]
+[ext_resource type="Script" uid="uid://ylal1qlbmnid" path="res://scripts/grapple.gd" id="3_qhqgy"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dn4c7"]
+atlas = ExtResource("1_lj8jo")
+region = Rect2(426, 0, 213, 360)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_4vejd"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dn4c7")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_g2brh"]
+radius = 52.0
+height = 502.0
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+script = ExtResource("1_g2els")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.16000122, 0.16000122)
+sprite_frames = SubResource("SpriteFrames_4vejd")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(0.32000023, 0.12001046)
+shape = SubResource("CapsuleShape2D_g2brh")
+
+[node name="GrappleRay" type="RayCast2D" parent="."]
+target_position = Vector2(0, -1000)
+script = ExtResource("3_qhqgy")
+
+[node name="Line2D" type="Line2D" parent="."]
