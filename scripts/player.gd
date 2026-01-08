@@ -1,15 +1,19 @@
 extends CharacterBody2D
 
 #----------
-#ideas
+#maybe do
 #----------
-#todos
 #start with nothing/no grapple
 #airdash
 #double jump
 #varying tiles for slickness
 #following ghosts from celeste, follow same path and knock you down //figure it out later
 #double grapple
+
+#todo:
+# add some sort of visual animation for missed grapples. cant fire again till hook returns
+# inital rope just swing, no pull. wind waker style
+# rocket boost for simple rope. increase early verticality
 
 # --------------------
 # MOVEMENT 
@@ -31,7 +35,7 @@ extends CharacterBody2D
 @export var max_grapple_distance := 900.0
 @export var latch_distance := 40
 @export var max_rope_length := 400.0
-@export var coyote_time = .1  #coyote timing for jump
+var coyote_time = .1  #coyote timing for jump
 
 
 # --------------------
