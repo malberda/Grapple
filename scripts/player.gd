@@ -30,6 +30,7 @@ extends CharacterBody2D
 
 
 
+
 # --------------------
 # GRAPPLE
 # --------------------
@@ -40,6 +41,7 @@ extends CharacterBody2D
 @export var max_rope_length := 400.0
 var coyote_time = .1  #coyote timing for jump
 var valid_grapple_point: Variant
+@export var grapple_steering_factor = 4
 
 # --------------------
 # GENERAL USE
@@ -111,6 +113,7 @@ func _physics_process(delta):
 
 	move_and_slide()
 	update_rope()
+	update_player_direction()
 
 # --------------------
 # NORMAL MOVEMENT
@@ -120,7 +123,7 @@ func apply_movement(delta):
 
 	var target_speed := input_x * run_speed
 	var current_accel := accel if is_on_floor() else air_accel
-
+	
 	if input_x != 0:
 		velocity.x = move_toward(velocity.x, target_speed, current_accel * delta)
 	elif is_on_floor():
@@ -131,6 +134,13 @@ func apply_movement(delta):
 	if (is_on_floor() or coyote_timer > 0 ) and Input.is_action_just_pressed("jump"):
 		velocity.y = jump_velocity
 		coyote_timer = 0.0
+		
+func update_player_direction():
+	var input_x := Input.get_axis("left", "right")
+	if input_x > 0:
+		$AnimatedSprite2D.flip_h = false
+	else:
+		$AnimatedSprite2D.flip_h = true
 
 # --------------------
 # GRAPPLE LOGIC
@@ -144,6 +154,9 @@ func update_grapple_ray():
 	
 	# Force the ray to update its collision immediately
 	grapple_ray.force_raycast_update()
+	
+	
+	print(grapple_ray.is_colliding())
 	
 	# Check if there's a valid collision
 	if grapple_ray.is_colliding():
@@ -194,8 +207,10 @@ func can_grapple(collision_point: Vector2):
 		# Check Custom Data Layer "Grappleable" (must be defined in TileSet)
 		if tile_data and tile_data.has_custom_data("Grappleable") and tile_data.get_custom_data("Grappleable"):
 			return true
-	
-	return false
+		else:
+			return false
+	else:
+		return true
 
 func apply_grapple_physics(delta):
 	var input_x := Input.get_axis("left", "right")
@@ -213,7 +228,7 @@ func apply_grapple_physics(delta):
 		global_position = grapple_point - dir * max_rope_length
 		
 	if input_x != 0:
-		velocity.x += input_x * 4
+		velocity.x += input_x * grapple_steering_factor
 		
 	velocity += dir * grapple_pull_strength * delta
 	velocity *= grapple_damping
