@@ -20,7 +20,7 @@ animations = [{
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_g2brh"]
 radius = 40.624973
-height = 433.2956
+height = 416.63037
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
 script = ExtResource("1_g2els")
