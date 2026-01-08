@@ -1,9 +1,9 @@
-[gd_scene load_steps=9 format=4 uid="uid://dojg41nvlyxcd"]
+[gd_scene load_steps=9 format=4 uid="uid://cnjkn04rn4de0"]
 
-[ext_resource type="Script" uid="uid://dulk1n0g0xgay" path="res://scenes/main_2.gd" id="1_7pwm0"]
+[ext_resource type="Script" uid="uid://c354i11vtigd3" path="res://scenes/main_2.gd" id="1_7pwm0"]
 [ext_resource type="PackedScene" uid="uid://f6t5osam8m6x" path="res://scenes/player.tscn" id="1_qu8xk"]
 [ext_resource type="Texture2D" uid="uid://dxto2uff6bm24" path="res://sprites/spritesheet.png" id="2_7pwm0"]
-[ext_resource type="Script" uid="uid://bwp5whs4tl5f" path="res://scripts/path_follow_2d.gd" id="4_xdoxa"]
+[ext_resource type="Script" uid="uid://bktbjqsvvio5t" path="res://scripts/path_follow_2d.gd" id="4_xdoxa"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_qu8xk"]
 texture = ExtResource("2_7pwm0")
@@ -193,9 +193,24 @@ size = Vector2(330, 66)
 script = ExtResource("1_7pwm0")
 
 [node name="Player" parent="." instance=ExtResource("1_qu8xk")]
-position = Vector2(1241, -11)
-latch_jump_enabled = false
+position = Vector2(451, -2221)
+hook_speed = null
+hook_return_speed = null
+camera_pull_strength = null
+camera_pull_smoothing = null
+max_camera_offset = null
+accel = null
+air_accel = null
+friction = null
+gravity = null
+jump_velocity = null
+jump_cut_multiplier = null
 grapple_pull_strength = 1600.0
+grapple_damping = null
+max_grapple_distance = null
+latch_distance = null
+max_rope_length = null
+grapple_steering_factor = null
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
 position = Vector2(0, 2)

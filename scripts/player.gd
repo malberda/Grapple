@@ -18,13 +18,13 @@ extends CharacterBody2D
 # --------------------
 # EQUIPMENT
 # --------------------
-var grappleUnlocked = true
+var grappleUnlocked = false
 var grapplePullUnlocked = false
-var rocketBoostUnlocked = true
-var airdashUnlocked = true
-var doubleJumpUnlocked = true
-var doubleHookUnlocked = true
-var latchJumpUnlocked = true
+var rocketBoostUnlocked = false
+var airdashUnlocked = false
+var doubleJumpUnlocked = false
+var doubleHookUnlocked = false
+var latchJumpUnlocked = false
 enum GrappleState {
 	IDLE,
 	FIRING,
@@ -96,6 +96,7 @@ var coyote_timer = 0.0
 @onready var rope: Line2D = $Grapple/Rope
 
 func _ready():
+	add_to_group('player')
 	floor_max_angle = deg_to_rad(50)
 
 # --------------------
@@ -253,7 +254,6 @@ func update_firing(delta):
 		var hit_point = grapple_ray.get_collision_point()
 
 		# Final safety check
-		
 		if global_position.distance_to(hit_point) <= max_rope_length and can_grapple(hit_point):
 			grapple_point = hit_point
 			rope_length = global_position.distance_to(grapple_point)
@@ -276,6 +276,10 @@ func update_return(delta):
 	if dist < 16:
 		grapple_state = GrappleState.IDLE
 		rope.visible = false
+		
+		grapple_ray.target_position = Vector2.ZERO
+		grapple_ray.enabled = true
+		grapple_ray.force_raycast_update()
 		return
 
 	hook_velocity = to_player.normalized() * hook_return_speed
@@ -460,10 +464,10 @@ func update_rope():
 	]
 
 func update_aim_line():
-	if grapple_state != GrappleState.IDLE:
+	if grapple_state != GrappleState.IDLE or !grappleUnlocked:
 		aim_line.visible = false
 		return
-
+	grapple_ray.global_position = global_position
 
 	var mouse_local := to_local(get_global_mouse_position())
 	var dir := mouse_local.normalized()
@@ -471,17 +475,51 @@ func update_aim_line():
 
 	grapple_ray.target_position = dir * max_grapple_distance
 	grapple_ray.force_raycast_update()
+	
 
 	var valid = grapple_ray.is_colliding() and mouse_local.length() <= max_rope_length
 
 	aim_line.visible = true
-	aim_line.points = [
-		Vector2.ZERO,
-		dir * length
-	]
-
-	aim_line.default_color = Color(
-		0.4, 1.0, 0.6, 0.8
-	) if valid else Color(
-		1.0, 0.3, 0.3, 0.5
-	)
+	
+	if grapple_ray.is_colliding():
+		var collision_point :Vector2 = grapple_ray.get_collision_point()
+		var local_hit := to_local(collision_point)
+		var collision_distance = local_hit.length()
+		
+		if collision_distance <= max_rope_length and can_grapple(collision_point):
+			aim_line.points = [
+				Vector2.ZERO,
+				local_hit
+			]
+			aim_line.default_color = Color(
+				0.4, 1.0, 0.6, 0.8
+			) 
+			return
+		elif not can_grapple(collision_point):
+			aim_line.points = [
+				Vector2.ZERO,
+				local_hit
+			]
+			aim_line.default_color = Color(
+				1.0, 0.3, 0.3, 0.5
+			)
+			return
+		else:
+			aim_line.points = [
+				Vector2.ZERO,
+				dir*max_grapple_distance
+			]
+			aim_line.default_color = Color(
+				1.0, 0.3, 0.3, 0.5
+			)
+			return
+	else:
+		aim_line.points = [
+			Vector2.ZERO,
+			dir*max_grapple_distance
+		]
+		aim_line.default_color = Color(
+			1.0, 0.3, 0.3, 0.5
+		)
+		return
+		

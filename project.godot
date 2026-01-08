@@ -24,6 +24,10 @@ window/size/viewport_height=1080
 
 project/assembly_name="grapel rage game"
 
+[global_group]
+
+player="global player group"
+
 [input]
 
 up={

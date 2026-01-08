@@ -1,13 +1,13 @@
 extends Node2D
 
 @onready var player: CharacterBody2D = $Player
-var grappleUnlocked = true
-var grapplePullUnlocked = false
-var rocketBoostUnlocked = false
-var airdashUnlocked = false
-var doubleJumpUnlocked = false
-var doubleHookUnlocked = false
-var latchJumpUnlocked = false
+@export var grappleUnlocked = false
+@export var grapplePullUnlocked = false
+@export var rocketBoostUnlocked = false
+@export var airdashUnlocked = false
+@export var doubleJumpUnlocked = false
+@export var doubleHookUnlocked = false
+@export var latchJumpUnlocked = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
