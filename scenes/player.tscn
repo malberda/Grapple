@@ -19,12 +19,22 @@ animations = [{
 }]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_g2brh"]
-radius = 49.999966
-height = 466.626
+radius = 40.624973
+height = 433.2956
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
 script = ExtResource("1_g2els")
 run_speed = 230.165
+
+[node name="Grapple" type="Node2D" parent="."]
+
+[node name="Rope" type="Line2D" parent="Grapple"]
+
+[node name="GrappleRay" type="RayCast2D" parent="Grapple"]
+target_position = Vector2(0, -1000)
+
+[node name="AimLine" type="Line2D" parent="Grapple"]
+width = 1.5
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(0.16000122, 0.16000122)
@@ -34,7 +44,4 @@ sprite_frames = SubResource("SpriteFrames_4vejd")
 scale = Vector2(0.32000023, 0.12001046)
 shape = SubResource("CapsuleShape2D_g2brh")
 
-[node name="GrappleRay" type="RayCast2D" parent="."]
-target_position = Vector2(0, -1000)
-
-[node name="Line2D" type="Line2D" parent="."]
+[node name="Camera" type="Camera2D" parent="."]

@@ -16,6 +16,38 @@ extends CharacterBody2D
 # rocket boost for simple rope. increase early verticality
 
 # --------------------
+# EQUIPMENT
+# --------------------
+var grappleUnlocked = true
+var grapplePullUnlocked = false
+var rocketBoostUnlocked = true
+var airdashUnlocked = false
+var doubleJumpUnlocked = false
+var doubleHookUnlocked = false
+var latchJumpUnlocked = false
+enum GrappleState {
+	IDLE,
+	FIRING,
+	LATCHED,
+	RETURNING
+}
+var grapple_state := GrappleState.IDLE
+@export var hook_speed := 2000.0
+@export var hook_return_speed := 2400.0
+
+var hook_position: Vector2
+var hook_velocity: Vector2
+
+
+# --------------------
+# CAMERA 
+# --------------------
+@export var camera_pull_strength := 0.1
+@export var camera_pull_smoothing := 12.0
+@export var max_camera_offset := 36.0
+@onready var camera: Camera2D = $Camera
+
+# --------------------
 # MOVEMENT 
 # --------------------
 @export var run_speed := 240.0
@@ -32,10 +64,14 @@ extends CharacterBody2D
 # --------------------
 @export var grapple_pull_strength := 3200.0
 @export var grapple_damping := 0.99
-@export var max_grapple_distance := 900.0
+@export var max_grapple_distance := 400.0
 @export var latch_distance := 40
 @export var max_rope_length := 400.0
+@onready var aim_line: Line2D = $Grapple/AimLine
 var coyote_time = .1  #coyote timing for jump
+var rope_length := 0.0
+var rope_pivot: Vector2
+var has_pivot := false
 
 
 # --------------------
@@ -47,9 +83,19 @@ var grapple_point: Vector2
 var grapple_requested := false
 var coyote_timer = 0.0
 
+# --------------------
+# ROCKET BOOST
+# --------------------
+@export var rocket_boost_strength := 1800.0  # tweak for speediness
+@export var rocket_boost_duration := 0.2     # seconds of boost
+var rocket_boost_timer := 0.0
 
-@onready var grapple_ray := $GrappleRay
-@onready var rope := $Line2D
+
+# --------------------
+# VISUALS
+# --------------------
+@onready var grapple_ray: RayCast2D = $Grapple/GrappleRay
+@onready var rope: Line2D = $Grapple/Rope
 
 func _ready():
 	floor_max_angle = deg_to_rad(50)
@@ -58,11 +104,27 @@ func _ready():
 # INPUT
 # --------------------
 func _input(event):
+	if event.is_action_pressed("1"):
+		grapplePullUnlocked = !grapplePullUnlocked
+	if event.is_action_pressed("2"):
+		rocketBoostUnlocked = !rocketBoostUnlocked
+	if event.is_action_pressed("3"):
+		airdashUnlocked = !airdashUnlocked
+	if event.is_action_pressed("4"):
+		doubleJumpUnlocked = !doubleJumpUnlocked
+	if event.is_action_pressed("5"):
+		doubleHookUnlocked = !doubleHookUnlocked
+	if event.is_action_pressed("6"):
+		latchJumpUnlocked = !latchJumpUnlocked
+		
+	
 	if event.is_action_released('jump') and velocity.y < 0:
 		velocity.y *= jump_cut_multiplier
 	
-	if event.is_action_pressed("grapple"):
-		grapple_requested = true
+	if event.is_action_pressed("grapple") and grappleUnlocked:
+		if grapple_state == GrappleState.IDLE:
+			fire_grapple()
+
 		
 	if event.is_action_pressed("reset_level"):
 		get_tree().reload_current_scene()
@@ -75,19 +137,22 @@ func _input(event):
 # PHYSICS LOOP
 # --------------------
 func _physics_process(delta):
+	update_grapple(delta)
 	update_grapple_ray()
 	if is_on_floor():
 		coyote_timer = coyote_time
 	else:
 		coyote_timer -= delta
+		
+	# Only when grappled and rocket boost unlocked
+	if is_grappling and Input.is_action_just_pressed("rocketBoost") and rocketBoostUnlocked:
+		rocket_boost_timer = rocket_boost_duration
 
-	if grapple_requested and not is_grappling:
-		try_start_grapple()
-		grapple_requested = false
+
 
 	if is_latched:
 		velocity = Vector2.ZERO  # stick to wall
-		if Input.is_action_just_pressed("jump"):
+		if Input.is_action_just_pressed("jump") and latchJumpUnlocked:
 			release_grapple()
 			velocity.y = jump_velocity
 	elif is_grappling:
@@ -97,6 +162,8 @@ func _physics_process(delta):
 
 	move_and_slide()
 	update_rope()
+	update_aim_line()
+	update_camera_pull(delta)
 
 # --------------------
 # NORMAL MOVEMENT
@@ -121,6 +188,93 @@ func apply_movement(delta):
 # --------------------
 # GRAPPLE LOGIC
 # --------------------
+func check_grapple_interrupt():
+	if not is_grappling:
+		return
+	
+	# Raycast from player to grapple point
+	var from = global_position
+	var to = rope_pivot if has_pivot else grapple_point
+	
+	grapple_ray.global_position = from
+	grapple_ray.target_position = to - from
+	grapple_ray.force_raycast_update()
+	
+	if grapple_ray.is_colliding():
+		var hit = grapple_ray.get_collision_point()
+		# If hit is **not the original grapple point**, disconnect
+		if hit.distance_to(to) > 8:
+			release_grapple()
+
+func update_grapple(delta):
+	match grapple_state:
+		GrappleState.FIRING:
+			update_firing(delta)
+		GrappleState.LATCHED:
+			apply_grapple_physics(delta)
+		GrappleState.RETURNING:
+			update_return(delta)
+			
+func update_firing(delta):
+	var prev_pos = hook_position
+	var step = hook_velocity * delta
+	var next_pos = hook_position + step
+
+	var max_vec = (next_pos - global_position)
+	if max_vec.length() > max_grapple_distance:
+		next_pos = global_position + max_vec.normalized() * max_grapple_distance
+
+	hook_position = next_pos
+
+	# Sweep ray (prev → current)
+	grapple_ray.global_position = prev_pos
+	grapple_ray.target_position = hook_position - prev_pos
+	grapple_ray.force_raycast_update()
+
+	# HIT
+	if grapple_ray.is_colliding():
+		var hit_point = grapple_ray.get_collision_point()
+
+		# Final safety check
+		if global_position.distance_to(hit_point) <= max_rope_length:
+			grapple_point = hit_point
+			rope_length = global_position.distance_to(grapple_point)
+			is_grappling = true
+			grapple_state = GrappleState.LATCHED
+			return
+
+	# STOP at max range
+	if hook_position.distance_to(global_position) >= max_grapple_distance:
+		start_grapple_return()
+
+func start_grapple_return():
+	grapple_state = GrappleState.RETURNING
+	is_grappling = false
+	is_latched = false
+func update_return(delta):
+	var to_player = global_position - hook_position
+	var dist = to_player.length()
+
+	if dist < 16:
+		grapple_state = GrappleState.IDLE
+		rope.visible = false
+		return
+
+	hook_velocity = to_player.normalized() * hook_return_speed
+	hook_position += hook_velocity * delta
+
+func fire_grapple():
+	grapple_state = GrappleState.FIRING
+
+	hook_position = global_position
+	var dir = (get_global_mouse_position() - global_position).normalized()
+	hook_velocity = dir * hook_speed
+
+	is_grappling = false
+	is_latched = false
+
+	rope.visible = true
+
 func update_grapple_ray():
 	var mouse_local := to_local(get_global_mouse_position())
 	grapple_ray.target_position = mouse_local.normalized() * max_grapple_distance
@@ -132,41 +286,152 @@ func try_start_grapple():
 		return
 		
 	var point = grapple_ray.get_collision_point()
+	var dist = global_position.distance_to(point)
 	
-	if global_position.distance_to(point) > max_rope_length:
+	if dist > max_rope_length:
 		return
 
+	rope_length = dist
 	grapple_point = grapple_ray.get_collision_point()
 	is_grappling = true
 
 func apply_grapple_physics(delta):
+	check_grapple_interrupt()
 	var to_hook := grapple_point - global_position
 	var dist := to_hook.length()
+	var dir := to_hook.normalized()
+	# Tangent vector (perpendicular to rope)
+	var tangent1 := Vector2(-dir.y, dir.x)
+	var tangent2 := Vector2(dir.y, -dir.x)
 
+	var tangential_speed1 := velocity.dot(tangent1)
+	var tangential_speed2 := velocity.dot(tangent2)
+	var tangent := tangent1 if abs(tangential_speed1) > abs(tangential_speed2) else tangent2
+
+	# Apply rocket boost if active
+	if rocket_boost_timer > 0:
+
+		var boost = tangent * rocket_boost_strength
+		velocity += boost * delta
+		rocket_boost_timer -= delta
+
+	# --- LATCH ---
 	if dist <= latch_distance:
 		is_latched = true
 		velocity = Vector2.ZERO
+		camera.offset += velocity.normalized() * 6
 		return
 		
-	var dir : Vector2 = to_hook.normalized()
-	
-	if dist > max_rope_length:
-		global_position = grapple_point - dir * max_rope_length
+	if grapplePullUnlocked:
 		
-	velocity += dir * grapple_pull_strength * delta
-	velocity *= grapple_damping
+		if dist > max_rope_length:
+			global_position = grapple_point - dir * max_rope_length
+			
+		velocity += dir * grapple_pull_strength * delta
+		velocity *= grapple_damping
+	else:
+		global_position = grapple_point - dir * rope_length
+		var radial_velocity = dir * velocity.dot(dir)
+		var input_x := Input.get_axis("left", "right")
+		velocity -= radial_velocity
+		velocity.x += input_x * air_accel * delta * .35
+
+		
+		velocity.y += gravity * delta
+		
+		
 
 func release_grapple():
-	is_grappling = false
-	is_latched = false
+	if grapple_state == GrappleState.LATCHED:
+		start_grapple_return()
+
+
+# --------------------
+# CAMERA STUFF
+# --------------------
+func update_camera_pull(delta):
+	# Ease back to center when not grappling
+	if not is_grappling:
+		camera.offset = camera.offset.lerp(
+			Vector2.ZERO,
+			delta * camera_pull_smoothing
+		)
+		return
+
+	# Tangent-only camera pull (great for swinging)
+	var to_hook = grapple_point - global_position
+	var dir = to_hook.normalized()
+	var tangent = Vector2(-dir.y, dir.x)
+
+	var tangential_speed = velocity.dot(tangent)
+	var pull = tangent * tangential_speed * camera_pull_strength
+	pull = pull.limit_length(max_camera_offset)
+
+
+	camera.offset = camera.offset.lerp(
+		pull,
+		delta * camera_pull_smoothing
+	)
+	
+func update_rope_pivot():
+	var from = global_position
+	var to = grapple_point
+
+	grapple_ray.global_position = from
+	grapple_ray.target_position = to - from
+	grapple_ray.force_raycast_update()
+
+	if grapple_ray.is_colliding():
+		var hit = grapple_ray.get_collision_point()
+
+		# Ignore hit very close to hook
+		if hit.distance_to(grapple_point) > 8:
+			rope_pivot = hit
+			has_pivot = true
+			return
+
+	has_pivot = false
 
 
 # --------------------
 # ROPE VISUAL
 # --------------------
 func update_rope():
-	if is_grappling:
-		rope.visible = true
-		rope.points = [Vector2.ZERO, to_local(grapple_point)]
-	else:
+	if grapple_state == GrappleState.IDLE:
 		rope.visible = false
+		return
+
+	rope.visible = true
+
+	var end_point := grapple_point if grapple_state == GrappleState.LATCHED else hook_position
+	rope.points = [
+		Vector2.ZERO,
+		to_local(end_point)
+	]
+
+func update_aim_line():
+	if grapple_state != GrappleState.IDLE:
+		aim_line.visible = false
+		return
+
+
+	var mouse_local := to_local(get_global_mouse_position())
+	var dir := mouse_local.normalized()
+	var length = min(mouse_local.length(), max_grapple_distance)
+
+	grapple_ray.target_position = dir * max_grapple_distance
+	grapple_ray.force_raycast_update()
+
+	var valid = grapple_ray.is_colliding() and mouse_local.length() <= max_rope_length
+
+	aim_line.visible = true
+	aim_line.points = [
+		Vector2.ZERO,
+		dir * length
+	]
+
+	aim_line.default_color = Color(
+		0.4, 1.0, 0.6, 0.8
+	) if valid else Color(
+		1.0, 0.3, 0.3, 0.5
+	)
