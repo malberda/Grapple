@@ -15,6 +15,7 @@ extends CharacterBody2D
 # inital rope just swing, no pull. wind waker style
 # rocket boost for simple rope. increase early verticality
 
+var scaling_factor: float = 8.0;
 # --------------------
 # EQUIPMENT
 # --------------------
@@ -32,8 +33,8 @@ enum GrappleState {
 	RETURNING
 }
 var grapple_state := GrappleState.IDLE
-@export var hook_speed := 2000.0
-@export var hook_return_speed := 2400.0
+@export var hook_speed := 2000 * scaling_factor
+@export var hook_return_speed := 2400.0 * scaling_factor
 
 var hook_position: Vector2
 var hook_velocity: Vector2
@@ -50,41 +51,42 @@ var hook_velocity: Vector2
 # --------------------
 # MOVEMENT 
 # --------------------
-@export var run_speed := 240.0
-@export var accel := 2000.0
-@export var air_accel := 1200.0
-@export var friction := 1800.0
-@export var gravity := 1500.0
-@export var jump_velocity := -600.0
+@export var run_speed := 240.0 * scaling_factor
+@export var accel := 2000.0 * scaling_factor
+@export var air_accel := 1200.0 * scaling_factor
+@export var friction := 1800.0 * scaling_factor
+@export var gravity := 1500.0 * scaling_factor
+@export var jump_velocity := -600.0 * scaling_factor
 @export var jump_cut_multiplier := 0.35
 
 # --------------------
 # DOUBLE JUMP
 # --------------------
-@export var double_jump_horizontal_speed := 400.0  # max horizontal gain
-@export var double_jump_vertical_speed := -520.0   # initial vertical
-@export var double_jump_acceleration := 1500.0    # how fast horizontal reaches max
-@export var double_jump_max_hold_time := 0.3      # how long you can hold for max momentum
-@export var double_jump_velocity := -520.0
-@export var double_jump_cut_multiplier := 0.35
+@export var double_jump_horizontal_speed := 400.0 * scaling_factor  # max horizontal gain
+@export var double_jump_vertical_speed := -520.0 * scaling_factor   # initial vertical
+@export var double_jump_acceleration := 1500.0 * scaling_factor    # how fast horizontal reaches max
+@export var double_jump_max_hold_time := 0.3 * scaling_factor      # how long you can hold for max momentum
+@export var double_jump_velocity := -520.0 * scaling_factor
+@export var double_jump_cut_multiplier := 0.35 * scaling_factor
 
 var double_jump_holding := false
 var double_jump_hold_timer := 0.0
 var can_double_jump := false
 var used_double_jump := false
+var input_super_grapple = true
 
 # --------------------
 # GRAPPLE
 # --------------------
-@export var grapple_pull_strength := 3200.0
+@export var grapple_pull_strength := 800.0 * scaling_factor
 @export var grapple_damping := 0.99
-@export var max_grapple_distance := 400.0
-@export var latch_distance := 40
-@export var max_rope_length := 400.0
+@export var max_grapple_distance := 400.0 * scaling_factor
+@export var latch_distance := 40 * scaling_factor
+@export var max_rope_length := 400.0 * scaling_factor
 @onready var aim_line: Line2D = $Grapple/AimLine
-@export var max_firing_time := 0.25
+@export var max_firing_time := 0.25 * scaling_factor
 var firing_timer := 0.0
-var coyote_time = .1  #coyote timing for jump
+var coyote_time = .1 * scaling_factor  #coyote timing for jump
 var rope_length := 0.0
 var rope_pivot: Vector2
 var has_pivot := false
@@ -102,6 +104,7 @@ var is_grappling := false
 var grapple_point: Vector2
 var grapple_requested := false
 var coyote_timer = 0.0
+var prev_global_position
 
 
 # --------------------
@@ -111,8 +114,27 @@ var coyote_timer = 0.0
 @onready var rope: Line2D = $Grapple/Rope
 
 func _ready():
+	
 	add_to_group('player')
 	floor_max_angle = deg_to_rad(50)
+	prev_global_position = self.global_position
+	
+func _draw():
+	var vel = prev_global_position - self.global_position
+	prev_global_position = self.global_position
+	
+	if vel.x == 0 and vel.y == 0:
+		$AnimatedSprite2D.stop()
+	elif is_grappling or is_latched or !is_on_floor():
+		$AnimatedSprite2D.pause()
+	else:
+		$AnimatedSprite2D.play('default')
+		if vel.x > 0:
+			$AnimatedSprite2D.flip_h = false
+			$LightOccluder2D.scale.x = 1
+		else:
+			$AnimatedSprite2D.flip_h = true	
+			$LightOccluder2D.scale.x = -1
 
 # --------------------
 # INPUT
@@ -121,10 +143,10 @@ func _input(event):
 	if event.is_action_pressed("airDash") and airdashUnlocked and airdash_helper.can_airdash:# and not is_on_floor():
 		var input_dir = Vector2(
 			Input.get_axis("left", "right"),
-			Input.get_axis("up", "down")
+			0
 		)
 		if input_dir == Vector2.ZERO:
-			input_dir.x = airdash_helper.last_input_x # default 1/-1
+			input_dir.x = airdash_helper.last_input_x * scaling_factor # default 1/-1
 		airdash_helper.airdash_direction = input_dir.normalized()
 		airdash_helper.airdash_timer = airdash_helper.airdash_time
 		airdash_helper.can_airdash = false
@@ -135,32 +157,39 @@ func _input(event):
 	
 	if event.is_action_pressed("grapple") and grappleUnlocked:
 		if grapple_state == GrappleState.IDLE:
+			input_super_grapple = false
+			fire_grapple()
+			
+	if event.is_action_pressed("super_grapple") and grappleUnlocked and grapplePullUnlocked:
+		if grapple_state == GrappleState.IDLE:
+			input_super_grapple = true
 			fire_grapple()
 		
 	if event.is_action_pressed("reset_level"):
 		get_tree().reload_current_scene()
 
-	if event.is_action_released("grapple"):
+	if event.is_action_released("grapple") or event.is_action_released("super_grapple"):
 		release_grapple()
 		grapple_requested = false
+	
+	if doubleJumpUnlocked:
+		if event.is_action_pressed("jump"):
+			# DOUBLE JUMP
+			if (
+				not is_on_floor() 
+				and coyote_timer <= 0.0
+				and can_double_jump
+				and not used_double_jump
+				and not is_grappling
+			):
+				velocity.y = double_jump_vertical_speed
+				used_double_jump = true
+				double_jump_holding = true
+				double_jump_hold_timer = double_jump_max_hold_time
 		
-	if event.is_action_pressed("jump"):
-		# DOUBLE JUMP
-		if (
-			doubleJumpUnlocked
-			 and not is_on_floor() 
-			 and coyote_timer <= 0.0
-			 and can_double_jump
-			 and not used_double_jump
-			 and not is_grappling
-		):
-			velocity.y = double_jump_vertical_speed
-			used_double_jump = true
-			double_jump_holding = true
-			double_jump_hold_timer = double_jump_max_hold_time
-	if event.is_action_released("jump") and velocity.y < 0 and double_jump_holding:
-		velocity.y *= double_jump_cut_multiplier
-		double_jump_holding = false
+		if event.is_action_released("jump") and velocity.y < 0 and double_jump_holding:
+			velocity.y *= double_jump_cut_multiplier
+			double_jump_holding = false
 
 
 # --------------------
@@ -188,8 +217,6 @@ func _physics_process(delta):
 		velocity = airdash_helper.airdash_direction * airdash_helper.airdash_speed
 		airdash_helper.airdash_timer -= delta
 
-
-
 	if is_latched:
 		velocity = Vector2.ZERO  # stick to wall
 		if Input.is_action_just_pressed("jump") and latchJumpUnlocked:
@@ -200,7 +227,7 @@ func _physics_process(delta):
 	else:
 		apply_movement(delta)
 		
-	if double_jump_holding and double_jump_hold_timer > 0:
+	if doubleJumpUnlocked and double_jump_holding and double_jump_hold_timer > 0:
 		var input_x := Input.get_axis("left", "right")
 		if input_x != 0:
 			var target_horiz = input_x * double_jump_horizontal_speed
@@ -307,11 +334,12 @@ func start_grapple_return():
 	grapple_state = GrappleState.RETURNING
 	is_grappling = false
 	is_latched = false
+
 func update_return(delta):
 	var to_player = global_position - hook_position
 	var dist = to_player.length()
 
-	if dist < 16:
+	if dist < 16 * scaling_factor:
 		grapple_state = GrappleState.IDLE
 		rope.visible = false
 		
@@ -338,6 +366,10 @@ func fire_grapple():
 	is_latched = false
 
 	rope.visible = true
+	
+func fire_super_grapple():
+	input_super_grapple = true
+	fire_grapple()
 
 func update_grapple_ray():
 	var mouse_local := to_local(get_global_mouse_position())	
@@ -376,7 +408,7 @@ func can_grapple(collision_point: Vector2):
 		# Need to offset the point in the direction the grapple ray is facing
 		# otherwise it will not register the tile when aiming at the bottom
 		# of a platform
-		var offset_point := collision_point + direction * 0.01
+		var offset_point := collision_point + direction * 0.1
 
 		var local_point = collider.to_local(offset_point)
 		var tile_coords = collider.local_to_map(local_point)
@@ -423,12 +455,14 @@ func apply_grapple_physics(delta):
 		camera.offset += velocity.normalized() * 6
 		return
 		
-	if grapplePullUnlocked:
+	if grapplePullUnlocked and input_super_grapple:
 		if dist > max_rope_length:
 			global_position = grapple_point - dir * max_rope_length
 			
 		velocity += dir * grapple_pull_strength * delta
 		velocity *= grapple_damping
+		var input_x := Input.get_axis("left", "right")
+		velocity += Vector2(input_x * scaling_factor * 4.0, 0)
 	else:
 		var max_length := rope_length
 		if has_pivot:
@@ -548,6 +582,7 @@ func update_aim_line():
 	var valid = grapple_ray.is_colliding() and mouse_local.length() <= max_rope_length
 
 	aim_line.visible = true
+	aim_line.width
 	
 	if grapple_ray.is_colliding():
 		var collision_point :Vector2 = grapple_ray.get_collision_point()
@@ -590,4 +625,3 @@ func update_aim_line():
 			1.0, 0.3, 0.3, 0.5
 		)
 		return
-		

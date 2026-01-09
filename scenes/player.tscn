@@ -1,25 +1,91 @@
-[gd_scene load_steps=6 format=3 uid="uid://f6t5osam8m6x"]
+[gd_scene load_steps=16 format=3 uid="uid://f6t5osam8m6x"]
 
 [ext_resource type="Script" uid="uid://bxb2418ihrr3t" path="res://scripts/player.gd" id="1_g2els"]
-[ext_resource type="Texture2D" uid="uid://kyu0sm7bps6s" path="res://sprites/maxresdefault.jpg" id="1_lj8jo"]
+[ext_resource type="Texture2D" uid="uid://h81d8pc6i632" path="res://sprites/mai.png" id="2_g2els"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_dn4c7"]
-atlas = ExtResource("1_lj8jo")
-region = Rect2(426, 0, 213, 360)
+[sub_resource type="AtlasTexture" id="AtlasTexture_qhqgy"]
+atlas = ExtResource("2_g2els")
+region = Rect2(0, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dqkch"]
+atlas = ExtResource("2_g2els")
+region = Rect2(256, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qlg0r"]
+atlas = ExtResource("2_g2els")
+region = Rect2(512, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tuyoq"]
+atlas = ExtResource("2_g2els")
+region = Rect2(768, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fjrip"]
+atlas = ExtResource("2_g2els")
+region = Rect2(1024, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_smehm"]
+atlas = ExtResource("2_g2els")
+region = Rect2(0, 256, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ur7pv"]
+atlas = ExtResource("2_g2els")
+region = Rect2(256, 256, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y4r1p"]
+atlas = ExtResource("2_g2els")
+region = Rect2(512, 256, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d2wvv"]
+atlas = ExtResource("2_g2els")
+region = Rect2(768, 256, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3v2ag"]
+atlas = ExtResource("2_g2els")
+region = Rect2(1024, 256, 256, 256)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_4vejd"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_dn4c7")
+"texture": SubResource("AtlasTexture_qhqgy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dqkch")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qlg0r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tuyoq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fjrip")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_smehm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ur7pv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y4r1p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d2wvv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3v2ag")
 }],
 "loop": true,
 "name": &"default",
-"speed": 5.0
+"speed": 10.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_g2els"]
-size = Vector2(96.87494, 308.3065)
+size = Vector2(105, 112)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_g2els"]
+polygon = PackedVector2Array(-80, -193, -94, -159, -119, -124, -124, -107, -120, -96, -155, 65, -199, 225, -189, 245, -149, 238, -128, 158, -78, 108, -62, 52, 11, 188, 30, 195, -4, 114, -5, 76, 84, 161, 132, 241, 183, 231, 219, 174, 145, 114, 121, 115, 56, -25, -4, -67, -4, -138, 25, -142, 37, -175, 22, -199, -14, -214)
 
 [node name="Player" type="CharacterBody2D"]
 script = ExtResource("1_g2els")
@@ -32,16 +98,21 @@ script = ExtResource("1_g2els")
 target_position = Vector2(0, -1000)
 
 [node name="AimLine" type="Line2D" parent="Grapple"]
-width = 1.5
+width = 30.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, -0.099890895)
-scale = Vector2(0.16000122, 0.16055615)
+scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_4vejd")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-0.5, 6.500001)
-scale = Vector2(0.32000023, 0.12001046)
+position = Vector2(8, 21)
+scale = Vector2(4, 4)
 shape = SubResource("RectangleShape2D_g2els")
 
 [node name="Camera" type="Camera2D" parent="."]
+position = Vector2(0, -1000)
+zoom = Vector2(0.15, 0.15)
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="."]
+occluder = SubResource("OccluderPolygon2D_g2els")

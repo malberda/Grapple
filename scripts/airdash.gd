@@ -3,7 +3,7 @@ extends Node
 # --------------------
 # AIR DASH
 # --------------------
-@export var airdash_speed := 650.0
+@export var airdash_speed := 650.0 * 8
 @export var airdash_time := 0.15       # duration of dash
 @export var airdash_cooldown := 0.25   # optional: cooldown before next dash
 var airdash_timer := 0.0

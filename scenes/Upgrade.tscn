@@ -1,19 +1,38 @@
-[gd_scene load_steps=4 format=3 uid="uid://b8o586qid8t86"]
+[gd_scene load_steps=6 format=3 uid="uid://b8o586qid8t86"]
 
 [ext_resource type="Script" uid="uid://cnoqcfcutsy6m" path="res://scripts/upgrade.gd" id="1_0qul8"]
-[ext_resource type="Texture2D" uid="uid://bsus570x7fu1m" path="res://sprites/hook.png" id="2_p0jec"]
+[ext_resource type="Texture2D" uid="uid://cdn6tigm0v1hx" path="res://sprites/grapple_hook.png" id="2_0qul8"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_mptdi"]
 radius = 113.03982
 
+[sub_resource type="Gradient" id="Gradient_0qul8"]
+colors = PackedColorArray(1, 0.68235296, 0.48235294, 1, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_p0jec"]
+gradient = SubResource("Gradient_0qul8")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 1)
+
 [node name="Upgrade" type="Area2D" groups=["player"]]
+z_index = 40
 scale = Vector2(0.17451046, 0.17451046)
 script = ExtResource("1_0qul8")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(20, 20)
 shape = SubResource("CircleShape2D_mptdi")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_p0jec")
+modulate = Color(0.5647059, 1, 1, 1)
+scale = Vector2(4, 3.238)
+texture = ExtResource("2_0qul8")
+
+[node name="PointLight2D" type="PointLight2D" parent="."]
+z_index = 49
+position = Vector2(-22.921387, -34.38159)
+scale = Vector2(164.19073, 125.555885)
+texture = SubResource("GradientTexture2D_p0jec")
 
 [connection signal="body_shape_entered" from="." to="." method="_on_body_shape_entered"]

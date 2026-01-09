@@ -1,0 +1,15 @@
+License:
+
+
+You can:
+
+    Use this tileset for both free and commercial projects.
+    Modify it to fit your needs.
+    Credit me (Vitalian, not required but appreciated.
+
+
+You cannot:
+
+    Redistribute, repackage or resell this tileset, no matter how much it was modified.
+    Use it inside software that allow the user to create maps and export them
+    Use it for for AI training or NFT projects  (Crypto, Blockchain, etc.)
