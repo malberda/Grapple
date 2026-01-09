@@ -58,6 +58,20 @@ var hook_velocity: Vector2
 @export var jump_velocity := -600.0
 @export var jump_cut_multiplier := 0.35
 
+# --------------------
+# DOUBLE JUMP
+# --------------------
+@export var double_jump_horizontal_speed := 400.0  # max horizontal gain
+@export var double_jump_vertical_speed := -520.0   # initial vertical
+@export var double_jump_acceleration := 1500.0    # how fast horizontal reaches max
+@export var double_jump_max_hold_time := 0.3      # how long you can hold for max momentum
+@export var double_jump_velocity := -520.0
+@export var double_jump_cut_multiplier := 0.35
+
+var double_jump_holding := false
+var double_jump_hold_timer := 0.0
+var can_double_jump := false
+var used_double_jump := false
 
 # --------------------
 # GRAPPLE
@@ -68,6 +82,8 @@ var hook_velocity: Vector2
 @export var latch_distance := 40
 @export var max_rope_length := 400.0
 @onready var aim_line: Line2D = $Grapple/AimLine
+@export var max_firing_time := 0.25
+var firing_timer := 0.0
 var coyote_time = .1  #coyote timing for jump
 var rope_length := 0.0
 var rope_pivot: Vector2
@@ -76,7 +92,6 @@ var has_pivot := false
 @onready var airdash_helper = preload("res://scripts/airdash.gd").new()
 @onready var rocket_boost_helper = preload("res://scripts/rocket_boost.gd").new()
 
-@export var grapple_steering_factor = 4
 var valid_grapple_point: Variant
 
 # --------------------
@@ -103,19 +118,6 @@ func _ready():
 # INPUT
 # --------------------
 func _input(event):
-	if event.is_action_pressed("1"):
-		grapplePullUnlocked = !grapplePullUnlocked
-	if event.is_action_pressed("2"):
-		rocketBoostUnlocked = !rocketBoostUnlocked
-	if event.is_action_pressed("3"):
-		airdashUnlocked = !airdashUnlocked
-	if event.is_action_pressed("4"):
-		doubleJumpUnlocked = !doubleJumpUnlocked
-	if event.is_action_pressed("5"):
-		doubleHookUnlocked = !doubleHookUnlocked
-	if event.is_action_pressed("6"):
-		latchJumpUnlocked = !latchJumpUnlocked
-		
 	if event.is_action_pressed("airDash") and airdashUnlocked and airdash_helper.can_airdash:# and not is_on_floor():
 		var input_dir = Vector2(
 			Input.get_axis("left", "right"),
@@ -134,7 +136,6 @@ func _input(event):
 	if event.is_action_pressed("grapple") and grappleUnlocked:
 		if grapple_state == GrappleState.IDLE:
 			fire_grapple()
-
 		
 	if event.is_action_pressed("reset_level"):
 		get_tree().reload_current_scene()
@@ -142,6 +143,25 @@ func _input(event):
 	if event.is_action_released("grapple"):
 		release_grapple()
 		grapple_requested = false
+		
+	if event.is_action_pressed("jump"):
+		# DOUBLE JUMP
+		if (
+			doubleJumpUnlocked
+			 and not is_on_floor() 
+			 and coyote_timer <= 0.0
+			 and can_double_jump
+			 and not used_double_jump
+			 and not is_grappling
+		):
+			velocity.y = double_jump_vertical_speed
+			used_double_jump = true
+			double_jump_holding = true
+			double_jump_hold_timer = double_jump_max_hold_time
+	if event.is_action_released("jump") and velocity.y < 0 and double_jump_holding:
+		velocity.y *= double_jump_cut_multiplier
+		double_jump_holding = false
+
 
 # --------------------
 # PHYSICS LOOP
@@ -149,6 +169,9 @@ func _input(event):
 func _physics_process(delta):
 	if is_on_floor():
 		airdash_helper.can_airdash = true
+		can_double_jump = true
+		used_double_jump = false
+
 	update_grapple(delta)
 	update_grapple_ray()
 	if is_on_floor():
@@ -176,6 +199,14 @@ func _physics_process(delta):
 		apply_grapple_physics(delta)
 	else:
 		apply_movement(delta)
+		
+	if double_jump_holding and double_jump_hold_timer > 0:
+		var input_x := Input.get_axis("left", "right")
+		if input_x != 0:
+			var target_horiz = input_x * double_jump_horizontal_speed
+			velocity.x = move_toward(velocity.x, target_horiz, double_jump_acceleration * delta)
+		double_jump_hold_timer -= delta
+
 
 	move_and_slide()
 	update_rope()
@@ -234,6 +265,11 @@ func update_grapple(delta):
 			update_return(delta)
 			
 func update_firing(delta):
+	firing_timer -= delta
+	if firing_timer <= 0:
+		start_grapple_return()
+		return
+
 	var prev_pos = hook_position
 	var step = hook_velocity * delta
 	var next_pos = hook_position + step
@@ -255,6 +291,8 @@ func update_firing(delta):
 
 		# Final safety check
 		if global_position.distance_to(hit_point) <= max_rope_length and can_grapple(hit_point):
+			can_double_jump = true
+			used_double_jump = false
 			grapple_point = hit_point
 			rope_length = global_position.distance_to(grapple_point)
 			is_grappling = true
@@ -286,6 +324,9 @@ func update_return(delta):
 	hook_position += hook_velocity * delta
 
 func fire_grapple():
+	firing_timer = max_firing_time
+	rope.clear_points()
+	rope.visible = true
 	rocket_boost_helper.rocket_boost_used = false
 	grapple_state = GrappleState.FIRING
 
@@ -351,8 +392,13 @@ func can_grapple(collision_point: Vector2):
 
 
 func apply_grapple_physics(delta):	
+	update_rope_pivot()
 	check_grapple_interrupt()
-	var to_hook := grapple_point - global_position
+	
+	var rope_target := get_rope_target()
+	var to_hook := rope_target - global_position
+
+
 	var dist := to_hook.length()
 	var dir := to_hook.normalized()
 	# Tangent vector (perpendicular to rope)
@@ -384,7 +430,12 @@ func apply_grapple_physics(delta):
 		velocity += dir * grapple_pull_strength * delta
 		velocity *= grapple_damping
 	else:
-		global_position = grapple_point - dir * rope_length
+		var max_length := rope_length
+		if has_pivot:
+			max_length -= rope_pivot.distance_to(grapple_point)
+
+		global_position = rope_target - dir * max_length
+
 		var radial_velocity = dir * velocity.dot(dir)
 		var input_x := Input.get_axis("left", "right")
 		velocity -= radial_velocity
@@ -428,23 +479,32 @@ func update_camera_pull(delta):
 	)
 	
 func update_rope_pivot():
-	var from = global_position
-	var to = grapple_point
+	if not is_grappling:
+		has_pivot = false
+		return
+
+	var from := global_position
+	var to := grapple_point
 
 	grapple_ray.global_position = from
 	grapple_ray.target_position = to - from
 	grapple_ray.force_raycast_update()
 
 	if grapple_ray.is_colliding():
-		var hit = grapple_ray.get_collision_point()
+		var hit := grapple_ray.get_collision_point()
 
-		# Ignore hit very close to hook
+		# If the hit is NOT the actual hook point, we found a corner
 		if hit.distance_to(grapple_point) > 8:
-			rope_pivot = hit
-			has_pivot = true
+			if not has_pivot:
+				rope_pivot = hit
+				has_pivot = true
 			return
 
+	# If we have clear line of sight again → remove pivot
 	has_pivot = false
+
+func get_rope_target() -> Vector2:
+	return rope_pivot if has_pivot else grapple_point
 
 
 # --------------------
@@ -457,11 +517,19 @@ func update_rope():
 
 	rope.visible = true
 
-	var end_point := grapple_point if grapple_state == GrappleState.LATCHED else hook_position
-	rope.points = [
-		Vector2.ZERO,
-		to_local(end_point)
-	]
+	if has_pivot:
+		rope.points = [
+			Vector2.ZERO,
+			to_local(rope_pivot),
+			to_local(grapple_point)
+		]
+	else:
+		var end_point := grapple_point if grapple_state == GrappleState.LATCHED else hook_position
+		rope.points = [
+			Vector2.ZERO,
+			to_local(end_point)
+		]
+
 
 func update_aim_line():
 	if grapple_state != GrappleState.IDLE or !grappleUnlocked:
