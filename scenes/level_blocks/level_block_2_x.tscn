@@ -1,0 +1,33 @@
+[gd_scene load_steps=7 format=4 uid="uid://c3linp6kr8aaa"]
+
+[ext_resource type="Script" uid="uid://b4nplbdx8ydwk" path="res://scenes/level_blocks/block.gd" id="1_7aq1i"]
+[ext_resource type="PackedScene" uid="uid://xtgwodsc4vbc" path="res://scenes/tilesets/terrain.tscn" id="2_72f4e"]
+[ext_resource type="PackedScene" uid="uid://daiv07ewj8s7r" path="res://scenes/tilesets/decor.tscn" id="3_vwbhx"]
+[ext_resource type="PackedScene" uid="uid://c4uqq4mcsbcc2" path="res://scenes/tilesets/background.tscn" id="4_8iuss"]
+[ext_resource type="PackedScene" uid="uid://bunmoiiae4mwi" path="res://scenes/level_blocks/_connection_node.tscn" id="5_ldhi8"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7aq1i"]
+size = Vector2(8192, 4096)
+
+[node name="LevelBlock2x" type="Node2D"]
+script = ExtResource("1_7aq1i")
+
+[node name="Terrain" parent="." instance=ExtResource("2_72f4e")]
+tile_map_data = PackedByteArray("AAAAAPj/AAAHAAkAAAAPAPj/AAAJAAkAAAD4//j/AAAHAAkAAAD4/wcAAAAHAAkAAAD5//j/AAAHAAkAAAD5/wcAAAAHAAkAAAD6//j/AAAHAAkAAAD6/wcAAAAHAAkAAAD7//j/AAAHAAkAAAD7/wcAAAAHAAkAAAD8//j/AAAHAAkAAAD8/wcAAAAHAAkAAAD9//j/AAAHAAkAAAD9/wcAAAAHAAkAAAD+//j/AAAHAAkAAAD+/wcAAAAHAAkAAAD///j/AAAHAAkAAAD//wcAAAAHAAkAAAAAAAcAAAAHAAkAAAABAPj/AAAHAAkAAAABAAcAAAAHAAkAAAACAPj/AAAHAAkAAAACAAcAAAAHAAkAAAADAPj/AAAHAAkAAAADAAcAAAAHAAkAAAAEAPj/AAAHAAkAAAAEAAcAAAAHAAkAAAAFAPj/AAAHAAkAAAAFAAcAAAAHAAkAAAAGAPj/AAAHAAkAAAAGAAcAAAAHAAkAAAAHAPj/AAAHAAkAAAAHAAcAAAAHAAkAAAAIAAcAAAAJAAkAAAAJAAcAAAAJAAkAAAAKAAcAAAAJAAkAAAALAAcAAAAJAAkAAAAMAAcAAAAJAAkAAAANAAcAAAAJAAkAAAAOAAcAAAAJAAkAAAAPAAcAAAAJAAkAAADw/wcAAAAJAAkAAADx/wcAAAAJAAkAAADy/wcAAAAJAAkAAADz/wcAAAAJAAkAAAD0/wcAAAAJAAkAAAD1/wcAAAAJAAkAAAD2/wcAAAAJAAkAAAD3/wcAAAAJAAkAAADw//j/AAAJAAkAAADx//j/AAAJAAkAAADy//j/AAAJAAkAAADz//j/AAAJAAkAAAD0//j/AAAJAAkAAAD1//j/AAAJAAkAAAD2//j/AAAJAAkAAAD3//j/AAAJAAkAAAAIAPj/AAAJAAkAAAAJAPj/AAAJAAkAAAAKAPj/AAAJAAkAAAALAPj/AAAJAAkAAAAMAPj/AAAJAAkAAAANAPj/AAAJAAkAAAAOAPj/AAAJAAkAAAA=")
+
+[node name="Decor" parent="." instance=ExtResource("3_vwbhx")]
+
+[node name="Background" parent="." instance=ExtResource("4_8iuss")]
+
+[node name="Connections" type="Node" parent="."]
+
+[node name="ConnectionNode" parent="Connections" instance=ExtResource("5_ldhi8")]
+position = Vector2(-4096, 0)
+
+[node name="ConnectionNode2" parent="Connections" instance=ExtResource("5_ldhi8")]
+position = Vector2(4096, 0)
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_7aq1i")

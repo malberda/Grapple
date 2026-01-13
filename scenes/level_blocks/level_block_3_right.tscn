@@ -1,0 +1,36 @@
+[gd_scene load_steps=7 format=4 uid="uid://cu051m55bemsr"]
+
+[ext_resource type="Script" uid="uid://b4nplbdx8ydwk" path="res://scenes/level_blocks/block.gd" id="1_m2wtj"]
+[ext_resource type="PackedScene" uid="uid://xtgwodsc4vbc" path="res://scenes/tilesets/terrain.tscn" id="2_r1gln"]
+[ext_resource type="PackedScene" uid="uid://daiv07ewj8s7r" path="res://scenes/tilesets/decor.tscn" id="3_1n205"]
+[ext_resource type="PackedScene" uid="uid://c4uqq4mcsbcc2" path="res://scenes/tilesets/background.tscn" id="4_buvkx"]
+[ext_resource type="PackedScene" uid="uid://bunmoiiae4mwi" path="res://scenes/level_blocks/_connection_node.tscn" id="5_cv51x"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_m2wtj"]
+size = Vector2(4096, 4096)
+
+[node name="LevelBlock3Left" type="Node2D"]
+script = ExtResource("1_m2wtj")
+
+[node name="Terrain" parent="." instance=ExtResource("2_r1gln")]
+tile_map_data = PackedByteArray("AAAHAP//AAAJAAkAAAAHAPv/AAAJAAkAAAAHAPz/AAAJAAkAAAAHAP3/AAAJAAkAAAAHAP7/AAAJAAkAAAAHAPj/AAAJAAkAAAAHAPn/AAAJAAkAAAAHAPr/AAAJAAkAAAAHAAAAAAAJAAkAAAAHAAEAAAAJAAkAAAAHAAIAAAAJAAkAAAAHAAMAAAAJAAkAAAAHAAQAAAAJAAkAAAAHAAUAAAAJAAkAAAAHAAYAAAAJAAkAAAAHAAcAAAAJAAkAAAA=")
+
+[node name="Decor" parent="." instance=ExtResource("3_1n205")]
+
+[node name="Background" parent="." instance=ExtResource("4_buvkx")]
+
+[node name="Connections" type="Node" parent="."]
+
+[node name="ConnectionNode" parent="Connections" instance=ExtResource("5_cv51x")]
+position = Vector2(-2048, 0)
+
+[node name="ConnectionNode2" parent="Connections" instance=ExtResource("5_cv51x")]
+position = Vector2(0, -2048)
+
+[node name="ConnectionNode3" parent="Connections" instance=ExtResource("5_cv51x")]
+position = Vector2(0, 2048)
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_m2wtj")

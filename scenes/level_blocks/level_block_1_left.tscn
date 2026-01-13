@@ -1,0 +1,30 @@
+[gd_scene load_steps=7 format=4 uid="uid://k1skmb173jhb"]
+
+[ext_resource type="PackedScene" uid="uid://xtgwodsc4vbc" path="res://scenes/tilesets/terrain.tscn" id="1_41spr"]
+[ext_resource type="Script" uid="uid://b4nplbdx8ydwk" path="res://scenes/level_blocks/block.gd" id="1_oooid"]
+[ext_resource type="PackedScene" uid="uid://daiv07ewj8s7r" path="res://scenes/tilesets/decor.tscn" id="2_oooid"]
+[ext_resource type="PackedScene" uid="uid://c4uqq4mcsbcc2" path="res://scenes/tilesets/background.tscn" id="3_f2ewx"]
+[ext_resource type="PackedScene" uid="uid://bunmoiiae4mwi" path="res://scenes/level_blocks/_connection_node.tscn" id="4_udb6e"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_av3pv"]
+size = Vector2(4096, 4096)
+
+[node name="LevelBlock1Left" type="Node2D"]
+script = ExtResource("1_oooid")
+
+[node name="Terrain" parent="." instance=ExtResource("1_41spr")]
+tile_map_data = PackedByteArray("AAAHAP//AAABAAUAAAAHAPv/AAABAAUAAAAHAPz/AAABAAUAAAAHAP3/AAABAAUAAAAHAP7/AAABAAUAAAAAAPj/AAAHAAkAAAAAAAcAAAAHAAkAAAABAPj/AAAHAAkAAAABAAcAAAAHAAkAAAACAPj/AAAHAAkAAAACAAcAAAAHAAkAAAADAPj/AAAHAAkAAAADAAcAAAAHAAkAAAAEAPj/AAAHAAkAAAAEAAcAAAAHAAkAAAAFAPj/AAAHAAkAAAAFAAcAAAAHAAkAAAAGAPj/AAAHAAkAAAAGAAcAAAAHAAkAAAAHAPj/AAAHAAkAAAAHAAcAAAAHAAkAAAD4//j/AAAHAAkAAAD4/wcAAAAHAAkAAAD5//j/AAAHAAkAAAD5/wcAAAAHAAkAAAD6//j/AAAHAAkAAAD6/wcAAAAHAAkAAAD7//j/AAAHAAkAAAD7/wcAAAAHAAkAAAD8//j/AAAHAAkAAAD8/wcAAAAHAAkAAAD9//j/AAAHAAkAAAD9/wcAAAAHAAkAAAD+//j/AAAHAAkAAAD+/wcAAAAHAAkAAAD///j/AAAHAAkAAAD//wcAAAAHAAkAAAAHAPn/AAABAAUAAAAHAPr/AAABAAUAAAAHAAAAAAABAAUAAAAHAAEAAAABAAUAAAAHAAIAAAABAAUAAAAHAAMAAAABAAUAAAAHAAQAAAABAAUAAAAHAAUAAAABAAUAAAAHAAYAAAABAAUAAAA=")
+
+[node name="Decor" parent="." instance=ExtResource("2_oooid")]
+
+[node name="Background" parent="." instance=ExtResource("3_f2ewx")]
+
+[node name="Connections" type="Node" parent="."]
+
+[node name="ConnectionNode" parent="Connections" instance=ExtResource("4_udb6e")]
+position = Vector2(-2048, 0)
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_av3pv")

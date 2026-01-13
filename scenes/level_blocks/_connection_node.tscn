@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://bunmoiiae4mwi"]
+
+[node name="ConnectionNode" type="Node2D"]

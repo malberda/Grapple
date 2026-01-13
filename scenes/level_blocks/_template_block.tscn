@@ -1,0 +1,25 @@
+[gd_scene load_steps=6 format=4 uid="uid://c5huk0yp76xjd"]
+
+[ext_resource type="PackedScene" uid="uid://xtgwodsc4vbc" path="res://scenes/tilesets/terrain.tscn" id="1_d224f"]
+[ext_resource type="Script" uid="uid://b4nplbdx8ydwk" path="res://scenes/level_blocks/block.gd" id="1_o4fbh"]
+[ext_resource type="PackedScene" uid="uid://daiv07ewj8s7r" path="res://scenes/tilesets/decor.tscn" id="2_jkmok"]
+[ext_resource type="PackedScene" uid="uid://c4uqq4mcsbcc2" path="res://scenes/tilesets/background.tscn" id="3_o4fbh"]
+[ext_resource type="PackedScene" uid="uid://bunmoiiae4mwi" path="res://scenes/level_blocks/_connection_node.tscn" id="4_jkmok"]
+
+[node name="TemplateBlock" type="Node2D"]
+script = ExtResource("1_o4fbh")
+
+[node name="Terrain" parent="." instance=ExtResource("1_d224f")]
+tile_map_data = PackedByteArray("AAD4//j/AAAHAAkAAAD4/wcAAAAHAAkAAAD5//j/AAAHAAkAAAD5/wcAAAAHAAkAAAD6//j/AAAHAAkAAAD6/wcAAAAHAAkAAAD7//j/AAAHAAkAAAD7/wcAAAAHAAkAAAD8//j/AAAHAAkAAAD8/wcAAAAHAAkAAAD9//j/AAAHAAkAAAD9/wcAAAAHAAkAAAD+//j/AAAHAAkAAAD+/wcAAAAHAAkAAAD///j/AAAHAAkAAAD//wcAAAAHAAkAAAAAAPj/AAAHAAkAAAAAAAcAAAAHAAkAAAABAPj/AAAHAAkAAAABAAcAAAAHAAkAAAACAPj/AAAHAAkAAAACAAcAAAAHAAkAAAADAPj/AAAHAAkAAAADAAcAAAAHAAkAAAAEAPj/AAAHAAkAAAAEAAcAAAAHAAkAAAAFAPj/AAAHAAkAAAAFAAcAAAAHAAkAAAAGAPj/AAAHAAkAAAAGAAcAAAAHAAkAAAAHAPj/AAAHAAkAAAAHAAcAAAAHAAkAAAA=")
+
+[node name="Decor" parent="." instance=ExtResource("2_jkmok")]
+
+[node name="Background" parent="." instance=ExtResource("3_o4fbh")]
+
+[node name="Connections" type="Node" parent="."]
+
+[node name="ConnectionNode" parent="Connections" instance=ExtResource("4_jkmok")]
+position = Vector2(-2048, 0)
+
+[node name="ConnectionNode2" parent="Connections" instance=ExtResource("4_jkmok")]
+position = Vector2(2048, 0)

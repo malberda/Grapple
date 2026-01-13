@@ -19,7 +19,6 @@ func _ready() -> void:
 	player.doubleHookUnlocked = doubleHookUnlocked
 	player.latchJumpUnlocked = latchJumpUnlocked
 	
-	$AudioStreamPlayer.play()
 	pass # Replace with function body.
 
 

@@ -19,11 +19,11 @@ var scaling_factor: float = 8.0;
 # --------------------
 # EQUIPMENT
 # --------------------
-var grappleUnlocked = false
-var grapplePullUnlocked = false
+var grappleUnlocked = true
+var grapplePullUnlocked = true
 var rocketBoostUnlocked = false
-var airdashUnlocked = false
-var doubleJumpUnlocked = false
+var airdashUnlocked = true
+var doubleJumpUnlocked = true
 var doubleHookUnlocked = false
 var latchJumpUnlocked = false
 enum GrappleState {
@@ -51,7 +51,7 @@ var hook_velocity: Vector2
 # --------------------
 # MOVEMENT 
 # --------------------
-@export var run_speed := 240.0 * scaling_factor
+@export var run_speed := 540.0 * scaling_factor
 @export var accel := 2000.0 * scaling_factor
 @export var air_accel := 1200.0 * scaling_factor
 @export var friction := 1800.0 * scaling_factor

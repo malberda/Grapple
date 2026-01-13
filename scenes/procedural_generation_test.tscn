@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dun4cv1pdid6x"]
+
+[ext_resource type="Script" uid="uid://b1qtvgsclnnp0" path="res://scenes/procedural_generation_test.gd" id="1_jr0qe"]
+
+[node name="ProceduralGenerationTest" type="Node2D"]
+script = ExtResource("1_jr0qe")
