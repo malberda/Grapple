@@ -15,6 +15,11 @@ var placed_blocks = []
 var intermediate_blocks = []
 var end_blocks = []
 
+const MAX_DEPTH = 3
+
+var use_seed = false
+const SEED = 4234
+
 # Simple struct-like class for connection info (you can also use Dictionary)
 class ConnectionNode:
 	var position: Vector2       # world position of connection
@@ -27,6 +32,9 @@ class ConnectionNode:
 		parent_block = parent
 
 func _ready() -> void:
+	if use_seed:
+		seed(SEED)
+	
 	if not level_block_start:
 		push_error("level_block_start is not set!")
 		return
@@ -52,9 +60,9 @@ func _ready() -> void:
 		y.queue_free()
 	
 	for c in start_block.get_connection_nodes():
-		add_next_connections(c, 1, 6)	
+		add_next_connections(c, 1, MAX_DEPTH)	
 	
-	#save_scene_to_editor(self)
+	save_scene_to_editor(self)
 
 
 func add_next_connections(connection, depth: int, max_depth: int):

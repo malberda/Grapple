@@ -87,18 +87,8 @@ size = Vector2(105, 112)
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_g2els"]
 polygon = PackedVector2Array(-80, -193, -94, -159, -119, -124, -124, -107, -120, -96, -155, 65, -199, 225, -189, 245, -149, 238, -128, 158, -78, 108, -62, 52, 11, 188, 30, 195, -4, 114, -5, 76, 84, 161, 132, 241, 183, 231, 219, 174, 145, 114, 121, 115, 56, -25, -4, -67, -4, -138, 25, -142, 37, -175, 22, -199, -14, -214)
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D" groups=["player"]]
 script = ExtResource("1_g2els")
-
-[node name="Grapple" type="Node2D" parent="."]
-
-[node name="Rope" type="Line2D" parent="Grapple"]
-
-[node name="GrappleRay" type="RayCast2D" parent="Grapple"]
-target_position = Vector2(0, -1000)
-
-[node name="AimLine" type="Line2D" parent="Grapple"]
-width = 30.0
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, -0.099890895)
@@ -112,7 +102,7 @@ shape = SubResource("RectangleShape2D_g2els")
 
 [node name="Camera" type="Camera2D" parent="."]
 position = Vector2(0, -1000)
-zoom = Vector2(0.1, 0.1)
+zoom = Vector2(0.15, 0.15)
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="."]
 occluder = SubResource("OccluderPolygon2D_g2els")
