@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=4 uid="uid://dg1y78nkxqoqc"]
+
+[ext_resource type="Script" uid="uid://b4nplbdx8ydwk" path="res://scenes/level_blocks/block.gd" id="1_8lucm"]
+[ext_resource type="PackedScene" uid="uid://xtgwodsc4vbc" path="res://scenes/tilesets/terrain.tscn" id="2_w864b"]
+[ext_resource type="PackedScene" uid="uid://bunmoiiae4mwi" path="res://scenes/level_blocks/_connection_node.tscn" id="3_roqik"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_aqm2v"]
+size = Vector2(2048, 4096)
+
+[node name="Hallway_NS_1" type="Node2D"]
+script = ExtResource("1_8lucm")
+
+[node name="Terrain" parent="." instance=ExtResource("2_w864b")]
+tile_map_data = PackedByteArray("AAD4//D/AgAAAAAAAAD4//H/AgAAAAAAAAD4//L/AgAAAAAAAAD4//P/AgAAAAAAAAD4//T/AgAAAAAAAAD4//X/AgAAAAAAAAD4//b/AgAAAAAAAAD4//f/AgAAAAAAAAD4//j/AgAAAAAAAAD4//n/AgAAAAAAAAD4//r/AgAAAAAAAAD4//v/AgAAAAAAAAD4//z/AgAAAAAAAAD4//3/AgAAAAAAAAD4//7/AgAAAAAAAAD4////AgAAAAAAAAD4/wAAAgAAAAAAAAD4/wEAAgAAAAAAAAD4/wIAAgAAAAAAAAD4/wMAAgAAAAAAAAD4/wQAAgAAAAAAAAD4/wUAAgAAAAAAAAD4/wYAAgAAAAAAAAD4/wcAAgAAAAAAAAD4/wgAAgAAAAAAAAD4/wkAAgAAAAAAAAD4/woAAgAAAAAAAAD4/wsAAgAAAAAAAAD4/wwAAgAAAAAAAAD4/w0AAgAAAAAAAAD4/w4AAgAAAAAAAAD4/w8AAgAAAAAAAAAHAPD/AgAAAAAAAAAHAPH/AgAAAAAAAAAHAPL/AgAAAAAAAAAHAPP/AgAAAAAAAAAHAPT/AgAAAAAAAAAHAPX/AgAAAAAAAAAHAPb/AgAAAAAAAAAHAPf/AgAAAAAAAAAHAPj/AgAAAAAAAAAHAPn/AgAAAAAAAAAHAPr/AgAAAAAAAAAHAPv/AgAAAAAAAAAHAPz/AgAAAAAAAAAHAP3/AgAAAAAAAAAHAP7/AgAAAAAAAAAHAP//AgAAAAAAAAAHAAAAAgAAAAAAAAAHAAEAAgAAAAAAAAAHAAIAAgAAAAAAAAAHAAMAAgAAAAAAAAAHAAQAAgAAAAAAAAAHAAUAAgAAAAAAAAAHAAYAAgAAAAAAAAAHAAcAAgAAAAAAAAAHAAgAAgAAAAAAAAAHAAkAAgAAAAAAAAAHAAoAAgAAAAAAAAAHAAsAAgAAAAAAAAAHAAwAAgAAAAAAAAAHAA0AAgAAAAAAAAAHAA4AAgAAAAAAAAAHAA8AAgAAAAAAAAA=")
+
+[node name="Connections" type="Node" parent="."]
+
+[node name="ConnectionNode" parent="Connections" instance=ExtResource("3_roqik")]
+position = Vector2(0, -2048)
+
+[node name="ConnectionNode2" parent="Connections" instance=ExtResource("3_roqik")]
+position = Vector2(0, 2048)
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_aqm2v")

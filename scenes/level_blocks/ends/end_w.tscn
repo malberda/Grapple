@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=4 uid="uid://bwb11vq1ff0cl"]
+
+[ext_resource type="Script" uid="uid://b4nplbdx8ydwk" path="res://scenes/level_blocks/block.gd" id="1_mgrdl"]
+[ext_resource type="PackedScene" uid="uid://xtgwodsc4vbc" path="res://scenes/tilesets/terrain.tscn" id="2_egfcp"]
+[ext_resource type="PackedScene" uid="uid://bunmoiiae4mwi" path="res://scenes/level_blocks/_connection_node.tscn" id="3_gyvu2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_aqm2v"]
+size = Vector2(2048, 2048)
+
+[node name="End_E" type="Node2D"]
+script = ExtResource("1_mgrdl")
+
+[node name="Terrain" parent="." instance=ExtResource("2_egfcp")]
+tile_map_data = PackedByteArray("AAD3//j/AgAAAAAAAAD3//n/AgAAAAAAAAD3//r/AgAAAAAAAAD3//v/AgAAAAAAAAD3//z/AgAAAAAAAAD3//3/AgAAAAAAAAD3//7/AgAAAAAAAAD3////AgAAAAAAAAD3/wAAAgAAAAAAAAD3/wEAAgAAAAAAAAD3/wIAAgAAAAAAAAD3/wMAAgAAAAAAAAD3/wQAAgAAAAAAAAD3/wUAAgAAAAAAAAD3/wYAAgAAAAAAAAD3/wcAAgAAAAAAAAA=")
+
+[node name="Connections" type="Node" parent="."]
+
+[node name="ConnectionNode" parent="Connections" instance=ExtResource("3_gyvu2")]
+position = Vector2(-1024, 0)
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_aqm2v")

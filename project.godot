@@ -11,9 +11,8 @@ config_version=5
 [application]
 
 config/name="Grapple rage game"
-run/main_scene="uid://c43ea2pq2n1xc"
+run/main_scene="uid://dun4cv1pdid6x"
 config/features=PackedStringArray("4.5", "Forward Plus")
-config/icon="res://icon.svg"
 
 [display]
 

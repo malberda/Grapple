@@ -13,33 +13,33 @@ var scaling_factor: float = 8.0;
 # --------------------
 # MOVEMENT 
 # --------------------
-@export var run_speed := 4320.0
-@export var accel := 16000.0
-@export var air_accel := 9600.0
-@export var friction := 14400.0
-@export var gravity := 12000.0
-@export var jump_velocity := -4800.0
+@export var run_speed := 2100.0
+@export var accel := 8000.0
+@export var air_accel := 4800.0
+@export var friction := 7000.0
+@export var gravity := 6000.0
+@export var jump_velocity := -2400.0
 @export var jump_cut_multiplier := 0.35
 
 # --------------------
 # DOUBLE JUMP
 # --------------------
-@export var double_jump_horizontal_speed := 4480.0  # max horizontal gain
-@export var double_jump_vertical_speed := -4480.0   # initial vertical
-@export var double_jump_acceleration := 12000.0    # how fast horizontal reaches max
+@export var double_jump_horizontal_speed := 2200.0  # max horizontal gain
+@export var double_jump_vertical_speed := -2200.0   # initial vertical
+@export var double_jump_acceleration := 6000.0    # how fast horizontal reaches max
 @export var double_jump_max_hold_time := 0.3      # how long you can hold for max momentum
-@export var double_jump_velocity := -4160.0
+@export var double_jump_velocity := -2000.0
 @export var double_jump_cut_multiplier := 2.8
 var double_jump_holding := false
 var double_jump_hold_timer := 0.0
 var can_double_jump := false
 var can_wall_jump := false
-@export var wall_jump_x_velocity = 3000.0
+@export var wall_jump_x_velocity = 1500.0
 
 # --------------------
 # AIR DASH
 # --------------------
-@export var airdash_speed := 5200.0
+@export var airdash_speed := 2600.0
 @export var airdash_time := 0.15       # duration of dash
 @export var airdash_cooldown := 0.25   # optional: cooldown before next dash
 var airdash_timer := 0.0
@@ -72,10 +72,8 @@ func _process(_delta):
 		$AnimatedSprite2D.play('default')
 		if vel.x > 0:
 			$AnimatedSprite2D.flip_h = false
-			$LightOccluder2D.scale.x = 1
 		else:
-			$AnimatedSprite2D.flip_h = true	
-			$LightOccluder2D.scale.x = -1
+			$AnimatedSprite2D.flip_h = true
 
 # --------------------
 # INPUT

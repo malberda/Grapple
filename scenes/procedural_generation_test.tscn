@@ -1,6 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://dun4cv1pdid6x"]
+[gd_scene load_steps=3 format=3 uid="uid://dun4cv1pdid6x"]
 
 [ext_resource type="Script" uid="uid://b1qtvgsclnnp0" path="res://scenes/procedural_generation_test.gd" id="1_jr0qe"]
+[ext_resource type="PackedScene" uid="uid://xtgwodsc4vbc" path="res://scenes/tilesets/terrain.tscn" id="2_x1tn6"]
 
 [node name="ProceduralGenerationTest" type="Node2D"]
 script = ExtResource("1_jr0qe")
+
+[node name="Terrain" parent="." instance=ExtResource("2_x1tn6")]
+
+[node name="CanvasModulate" type="CanvasModulate" parent="."]
+color = Color(0, 0, 0, 1)

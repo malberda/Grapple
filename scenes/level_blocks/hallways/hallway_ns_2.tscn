@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=4 uid="uid://c60v2k4fh46l7"]
+
+[ext_resource type="Script" uid="uid://b4nplbdx8ydwk" path="res://scenes/level_blocks/block.gd" id="1_mxybx"]
+[ext_resource type="PackedScene" uid="uid://xtgwodsc4vbc" path="res://scenes/tilesets/terrain.tscn" id="2_kep7a"]
+[ext_resource type="PackedScene" uid="uid://bunmoiiae4mwi" path="res://scenes/level_blocks/_connection_node.tscn" id="3_omf6p"]
+
+[sub_resource type="ConvexPolygonShape2D" id="ConvexPolygonShape2D_mxybx"]
+points = PackedVector2Array(-2048, -2048, 2048, -2048, 2048, 0, 128, 0, 128, 2048, -2048, 2048)
+
+[node name="Hallway_NS_2" type="Node2D"]
+script = ExtResource("1_mxybx")
+
+[node name="Terrain" parent="." instance=ExtResource("2_kep7a")]
+tile_map_data = PackedByteArray("AAAFAPf/AgAAAAAAAAAGAPf/AgAAAAAAAAAHAPf/AgAAAAAAAAAIAPf/AgAAAAAAAAAJAPf/AgAAAAAAAADw//D/AgAAAAAAAADw//H/AgAAAAAAAADw//L/AgAAAAAAAADw//P/AgAAAAAAAADw//T/AgAAAAAAAADw//X/AgAAAAAAAADw//b/AgAAAAAAAADw//f/AgAAAAAAAADw//j/AgAAAAAAAADw//n/AgAAAAAAAADw//r/AgAAAAAAAADw//v/AgAAAAAAAADw//z/AgAAAAAAAADw//3/AgAAAAAAAADw//7/AgAAAAAAAADw////AgAAAAAAAADw/wAAAgAAAAAAAADw/wEAAgAAAAAAAADw/wIAAgAAAAAAAADw/wMAAgAAAAAAAADw/wQAAgAAAAAAAADw/wUAAgAAAAAAAADw/wYAAgAAAAAAAADw/wcAAgAAAAAAAADw/wgAAgAAAAAAAADw/wkAAgAAAAAAAADw/woAAgAAAAAAAADw/wsAAgAAAAAAAADw/wwAAgAAAAAAAADw/w0AAgAAAAAAAADw/w4AAgAAAAAAAADw/w8AAgAAAAAAAADx//D/AgAAAAAAAADy//D/AgAAAAAAAADz//D/AgAAAAAAAAD0//D/AgAAAAAAAAD1//D/AgAAAAAAAAD2//D/AgAAAAAAAAD3//D/AgAAAAAAAAD4//D/AgAAAAAAAAD5//D/AgAAAAAAAAD6//D/AgAAAAAAAAD7//D/AgAAAAAAAAD8//D/AgAAAAAAAAD9//D/AgAAAAAAAAD+//D/AgAAAAAAAAD///D/AgAAAAAAAAAPAP3/AgAAAAAAAAAPAP7/AgAAAAAAAAAPAPD/AgAAAAAAAAAPAPH/AgAAAAAAAAAPAPL/AgAAAAAAAAAPAPP/AgAAAAAAAAAPAPT/AgAAAAAAAAAPAPX/AgAAAAAAAAAPAPb/AgAAAAAAAAAPAPf/AgAAAAAAAAAPAPj/AgAAAAAAAAAPAPn/AgAAAAAAAAAPAPr/AgAAAAAAAAAPAPv/AgAAAAAAAAAPAPz/AgAAAAAAAAAAAP//AgAAAAAAAAAAAAAAAgAAAAAAAAAAAAEAAgAAAAAAAAAAAAIAAgAAAAAAAAAAAAMAAgAAAAAAAAAAAAQAAgAAAAAAAAAAAAUAAgAAAAAAAAAAAAYAAgAAAAAAAAAAAAcAAgAAAAAAAAAAAAgAAgAAAAAAAAAAAAkAAgAAAAAAAAAAAAoAAgAAAAAAAAAAAAsAAgAAAAAAAAAAAAwAAgAAAAAAAAAAAA0AAgAAAAAAAAAAAA4AAgAAAAAAAAAAAA8AAgAAAAAAAAABAP//AgAAAAAAAAACAP//AgAAAAAAAAADAP//AgAAAAAAAAAEAP//AgAAAAAAAAAFAP//AgAAAAAAAAAGAP//AgAAAAAAAAAHAP//AgAAAAAAAAAIAP//AgAAAAAAAAAJAP//AgAAAAAAAAAKAP//AgAAAAAAAAALAP//AgAAAAAAAAAMAP//AgAAAAAAAAANAP//AgAAAAAAAAAOAP//AgAAAAAAAAAPAP//AgAAAAAAAAA=")
+
+[node name="Connections" type="Node" parent="."]
+
+[node name="ConnectionNode" parent="Connections" instance=ExtResource("3_omf6p")]
+position = Vector2(1024, -2048)
+
+[node name="ConnectionNode2" parent="Connections" instance=ExtResource("3_omf6p")]
+position = Vector2(-1024, 2048)
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("ConvexPolygonShape2D_mxybx")

@@ -10,10 +10,12 @@ class ConnectionNode:
 		position = pos
 		direction = dir
 		parent_block = parent
-	
+			
 
 func get_connection_nodes() -> Array[ConnectionNode]:
-	var connection_nodes: Array[ConnectionNode] = []
+	if connection_nodes.size() > 0:
+		return connection_nodes
+	
 	var nodes = $Connections.get_children()
 	for n in nodes:
 		var cn = ConnectionNode.new(
@@ -39,15 +41,33 @@ func get_node_direction(n: Node2D) -> String:
 	return get_relative_side(n.position, self.get_rect())
 		
 	
-## Optional - for better collision checking
 func get_rect() -> Rect2:
-	# return approximate bounding rect in local space
-	return $Area2D/CollisionShape2D.shape.get_rect()
+	# Return approximate bounding rect in local space
+	var shape = $Area2D/CollisionShape2D.shape
+	if shape is RectangleShape2D:
+		return shape.get_rect()
+	
+	var points: Array = shape.points
+	if points.is_empty():
+		return Rect2()
+	
+	var min_x: float = INF
+	var max_x: float = -INF
+	var min_y: float = INF
+	var max_y: float = -INF
+	
+	for p: Vector2 in points:
+		min_x = min(min_x, p.x)
+		max_x = max(max_x, p.x)
+		min_y = min(min_y, p.y)
+		max_y = max(max_y, p.y)
+	
+	return Rect2(min_x, min_y, max_x - min_x, max_y - min_y)
+	
+func get_rect_global():
+	return self.global_transform * self.get_rect()
 
 func get_relative_side(point: Vector2, rect: Rect2) -> String:
-	if rect.has_point(point):
-		print("ERRROR !!! Level block connection point is not on rect border")
-	
 	var left = rect.position.x
 	var right = rect.end.x
 	var top = rect.position.y
@@ -63,4 +83,5 @@ func get_relative_side(point: Vector2, rect: Rect2) -> String:
 	elif point.y == bottom:
 		return "bottom"
 	
-	return "on_edge"
+	print("block.gd: ERRROR !!! Level block connection point is not on rect border:", self.name)
+	return "not_on_edge"
