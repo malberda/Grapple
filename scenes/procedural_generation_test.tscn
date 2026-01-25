@@ -7,6 +7,3 @@
 script = ExtResource("1_jr0qe")
 
 [node name="Terrain" parent="." instance=ExtResource("2_x1tn6")]
-
-[node name="CanvasModulate" type="CanvasModulate" parent="."]
-color = Color(0, 0, 0, 1)

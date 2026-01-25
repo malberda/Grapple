@@ -65,7 +65,7 @@ func _ready() -> void:
 	add_next_connections(start_block.get_connection_nodes(), 1, MAX_DEPTH)		
 	fill_in_open_connections()
 	
-	#save_scene_to_editor(self)
+	save_scene_to_editor(self)
 
 func add_next_connections(connection_nodes: Array, depth: int, max_depth: int):
 	if connection_nodes.is_empty():

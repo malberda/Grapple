@@ -1,4 +1,4 @@
-extends CharacterBody2D
+class_name PlayerCharacter extends CharacterBody2D
 
 var scaling_factor: float = 8.0;
 
@@ -54,31 +54,45 @@ var last_input_x := 1  # Default facing right
 var coyote_timer = 0.0
 var coyote_time = .1  #coyote timing for jump
 var prev_global_position
+var attacking = false
+var trigger_attack_collision_check = false
+
+@onready var init_sprite_x_scale = self.scale.x
 
 
 func _ready():
 	floor_max_angle = deg_to_rad(50)
 	prev_global_position = self.global_position
+	$AttackTimer.connect("timeout", on_attack_timer_timeout)
+	$AttackCheckTimer.connect("timeout", on_attack_check_timer_timeout)
 	
 func _process(_delta):
-	var vel = prev_global_position - self.global_position
-	prev_global_position = self.global_position
+	pass
+	#var vel = prev_global_position - self.global_position
+	#prev_global_position = self.global_position
 	
-	if vel.x == 0 and vel.y == 0:
-		$AnimatedSprite2D.stop()
-	elif !is_on_floor():
-		$AnimatedSprite2D.pause()
-	else:
-		$AnimatedSprite2D.play('default')
-		if vel.x > 0:
-			$AnimatedSprite2D.flip_h = false
-		else:
-			$AnimatedSprite2D.flip_h = true
+	#if vel.x == 0 and vel.y == 0:
+		#$AnimatedSprite2D.stop()
+	#elif !is_on_floor():
+		#$AnimatedSprite2D.pause()
+	#else:
+		#$AnimatedSprite2D.play('idle')
+		#if vel.x > 0:
+			#
+		#else:
+			#self.scale.x = init_sprite_x_scale
 
 # --------------------
 # INPUT
 # --------------------
-func _input(event):
+func _input(event: InputEvent):
+	if event.is_action_pressed("attack"):
+		if !attacking:
+			attacking = true
+			trigger_attack_collision_check = false
+			$AttackTimer.start()
+			$AttackCheckTimer.start()
+	
 	if event.is_action_pressed("airDash") and can_airdash:# and not is_on_floor():
 		var input_dir = Vector2(
 			Input.get_axis("left", "right"),
@@ -126,6 +140,7 @@ func _input(event):
 # --------------------
 # PHYSICS LOOP
 # --------------------
+var facing_right = true
 func _physics_process(delta):
 	if is_on_floor():
 		can_airdash = true
@@ -150,6 +165,8 @@ func _physics_process(delta):
 
 	apply_movement(delta)
 	move_and_slide()
+	check_attack()
+	
 
 # --------------------
 # NORMAL MOVEMENT
@@ -160,7 +177,32 @@ func apply_movement(delta):
 		last_input_x = sign(input_x)
 	var target_speed := input_x * run_speed
 	var current_accel := accel if is_on_floor() else air_accel
-
+	
+	if attacking and input_x == 0:
+		$AnimatedSprite2D.play("attack")
+		$Weapon.play("attack")
+	elif attacking and input_x != 0:
+		$AnimatedSprite2D.play("run_attack")
+		$Weapon.play("run_attack")
+	else:
+		if input_x > 0:
+			if !facing_right:
+				scale.x = -1
+				facing_right = true
+			$AnimatedSprite2D.play("run")
+			$Weapon.play("run")
+		
+		if input_x < 0:
+			if facing_right:
+				scale.x = -1
+				facing_right = false
+			$AnimatedSprite2D.play("run")
+			$Weapon.play("run")
+			
+		if input_x == 0:
+			$AnimatedSprite2D.play("idle")
+			$Weapon.play("idle")
+	
 	if input_x != 0:
 		velocity.x = move_toward(velocity.x, target_speed, current_accel * delta)
 	elif is_on_floor():
@@ -177,3 +219,20 @@ func apply_movement(delta):
 	if (is_on_floor() or coyote_timer > 0) and Input.is_action_just_pressed("jump"):
 		velocity.y = jump_velocity
 		coyote_timer = 0.0
+
+var damage_assigned = []
+func check_attack():
+	if trigger_attack_collision_check:
+		var overlapping_areas: Array[Area2D] = $AttackBox.get_overlapping_areas()
+		for overlapping_area in overlapping_areas:
+			if overlapping_area.is_in_group("enemy") and not overlapping_area in damage_assigned:
+				damage_assigned.append(overlapping_area)
+				overlapping_area.take_damage(25)
+
+func on_attack_timer_timeout():
+	attacking = false
+	trigger_attack_collision_check = false
+	damage_assigned = []
+	
+func on_attack_check_timer_timeout():
+	trigger_attack_collision_check = true

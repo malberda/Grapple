@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://b4nplbdx8ydwk" path="res://scenes/level_blocks/block.gd" id="1_r1nfa"]
 [ext_resource type="PackedScene" uid="uid://xtgwodsc4vbc" path="res://scenes/tilesets/terrain.tscn" id="2_y28mm"]
+[ext_resource type="PackedScene" uid="uid://baqvr0ylvncsn" path="res://scenes/player_characters/buffman.tscn" id="4_gvrno"]
 [ext_resource type="PackedScene" uid="uid://bunmoiiae4mwi" path="res://scenes/level_blocks/_connection_node.tscn" id="5_bykk4"]
-[ext_resource type="PackedScene" uid="uid://f6t5osam8m6x" path="res://scenes/player.tscn" id="6_noytq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_r1nfa"]
 size = Vector2(2048, 2048)
@@ -22,10 +22,9 @@ position = Vector2(-1024, 0)
 [node name="ConnectionNode4" parent="Connections" instance=ExtResource("5_bykk4")]
 position = Vector2(1024, 0)
 
-[node name="Player" parent="." instance=ExtResource("6_noytq")]
-position = Vector2(0, 512)
-
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectangleShape2D_r1nfa")
+
+[node name="Buffman" parent="." instance=ExtResource("4_gvrno")]
