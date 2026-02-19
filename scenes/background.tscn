@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3 uid="uid://brmcpqq8mqm1s"]
+
+[ext_resource type="Texture2D" uid="uid://8jf536e3gfsv" path="res://backgrounds/nature_2/1.png" id="1_y0upk"]
+[ext_resource type="Texture2D" uid="uid://bdv7q4qev40fm" path="res://backgrounds/nature_4/3.png" id="2_jougr"]
+
+[node name="Background" type="Node2D"]
+
+[node name="BackgroundParallax" type="Parallax2D" parent="."]
+z_index = -1
+
+[node name="BackgroundSprite" type="Sprite2D" parent="BackgroundParallax"]
+z_index = -2
+position = Vector2(0, -576)
+scale = Vector2(6.666667, 6.716049)
+texture = ExtResource("1_y0upk")
+
+[node name="BackgroundParallaxTrees" type="Parallax2D" parent="."]
+repeat_size = Vector2(3840, 0)
+repeat_times = 4
+
+[node name="BackgroundParallaxTreesSprite" type="Sprite2D" parent="BackgroundParallaxTrees"]
+z_index = -1
+position = Vector2(0, -576)
+scale = Vector2(6.666667, 6.716049)
+texture = ExtResource("2_jougr")

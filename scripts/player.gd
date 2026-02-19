@@ -59,6 +59,7 @@ var trigger_attack_collision_check = false
 
 @onready var init_sprite_x_scale = self.scale.x
 
+@onready var new_block_spawn_area = $NewBlockSpawnArea
 
 func _ready():
 	floor_max_angle = deg_to_rad(50)
@@ -179,28 +180,28 @@ func apply_movement(delta):
 	var current_accel := accel if is_on_floor() else air_accel
 	
 	if attacking and input_x == 0:
-		$AnimatedSprite2D.play("attack")
+		$PlayerSprite.play("attack")
 		$Weapon.play("attack")
 	elif attacking and input_x != 0:
-		$AnimatedSprite2D.play("run_attack")
+		$PlayerSprite.play("run_attack")
 		$Weapon.play("run_attack")
 	else:
 		if input_x > 0:
 			if !facing_right:
 				scale.x = -1
 				facing_right = true
-			$AnimatedSprite2D.play("run")
+			$PlayerSprite.play("run")
 			$Weapon.play("run")
 		
 		if input_x < 0:
 			if facing_right:
 				scale.x = -1
 				facing_right = false
-			$AnimatedSprite2D.play("run")
+			$PlayerSprite.play("run")
 			$Weapon.play("run")
 			
 		if input_x == 0:
-			$AnimatedSprite2D.play("idle")
+			$PlayerSprite.play("idle")
 			$Weapon.play("idle")
 	
 	if input_x != 0:
@@ -236,3 +237,6 @@ func on_attack_timer_timeout():
 	
 func on_attack_check_timer_timeout():
 	trigger_attack_collision_check = true
+
+func bind_new_block_spawn_area_collision(callback: Callable):
+	new_block_spawn_area.connect("area_entered", callback)

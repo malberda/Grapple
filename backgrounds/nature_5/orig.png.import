@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://h81d8pc6i632"
-path="res://.godot/imported/mai.png-d4662c1882f070dc9013483671b68019.ctex"
+uid="uid://c1nqny158d7k8"
+path="res://.godot/imported/orig.png-548168c4543a8410c641a60780d15b6d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/mai.png"
-dest_files=["res://.godot/imported/mai.png-d4662c1882f070dc9013483671b68019.ctex"]
+source_file="res://backgrounds/nature_5/orig.png"
+dest_files=["res://.godot/imported/orig.png-548168c4543a8410c641a60780d15b6d.ctex"]
 
 [params]
 

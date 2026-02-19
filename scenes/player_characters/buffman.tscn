@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://baqvr0ylvncsn"]
+[gd_scene load_steps=33 format=3 uid="uid://baqvr0ylvncsn"]
 
 [ext_resource type="Script" uid="uid://bxb2418ihrr3t" path="res://scripts/player.gd" id="1_dmakx"]
 [ext_resource type="SpriteFrames" uid="uid://0xdh8nl33lqq" path="res://scenes/player_characters/buffman_frames.tres" id="2_2n736"]
@@ -191,28 +191,30 @@ animations = [{
 "speed": 12.0
 }]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2n736"]
+size = Vector2(6144, 4224)
+
 [node name="Buffman" type="CharacterBody2D"]
 script = ExtResource("1_dmakx")
 metadata/_custom_type_script = "uid://bxb2418ihrr3t"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="PlayerCollision" type="CollisionShape2D" parent="."]
 position = Vector2(0, -108)
 shape = SubResource("CapsuleShape2D_hs5it")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+[node name="PlayerSprite" type="AnimatedSprite2D" parent="."]
 position = Vector2(52.000004, -127.999985)
 scale = Vector2(5.3333335, 5.3333335)
 sprite_frames = ExtResource("2_2n736")
 animation = &"attack"
-frame_progress = 0.48418978
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(0, -128)
-zoom = Vector2(0.2, 0.2)
+position = Vector2(0, -568)
+zoom = Vector2(0.5, 0.5)
 
 [node name="AttackBox" type="Area2D" parent="."]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackBox"]
+[node name="AttackCollision" type="CollisionShape2D" parent="AttackBox"]
 position = Vector2(96, -100)
 shape = SubResource("RectangleShape2D_vreeu")
 
@@ -239,3 +241,12 @@ position = Vector2(52, -128)
 scale = Vector2(5.333, 5.333)
 sprite_frames = SubResource("SpriteFrames_ex76r")
 animation = &"attack"
+
+[node name="NewBlockSpawnArea" type="Area2D" parent="."]
+collision_layer = 256
+collision_mask = 256
+
+[node name="NewBlockSpawnCollisionShape" type="CollisionShape2D" parent="NewBlockSpawnArea"]
+modulate = Color(0.22745098, 0.2, 0.24705882, 1)
+position = Vector2(0, -576)
+shape = SubResource("RectangleShape2D_2n736")

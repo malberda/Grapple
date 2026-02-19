@@ -5,6 +5,7 @@ class ConnectionNode:
 	var position: Vector2       # world position of connection
 	var direction: String       # "top", "bottom", "left", "right"
 	var parent_block: Node2D    # block this connection belongs to
+	var depth: int
 	
 	func _init(pos: Vector2, dir: String, parent: Node2D):
 		position = pos

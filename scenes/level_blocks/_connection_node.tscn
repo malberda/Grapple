@@ -1,3 +1,19 @@
-[gd_scene format=3 uid="uid://bunmoiiae4mwi"]
+[gd_scene load_steps=3 format=3 uid="uid://bunmoiiae4mwi"]
+
+[ext_resource type="Script" uid="uid://c188fe7n7soa3" path="res://scenes/level_blocks/_connection_node.gd" id="1_45hik"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_45y16"]
+radius = 128.0
 
 [node name="ConnectionNode" type="Node2D"]
+script = ExtResource("1_45hik")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 256
+collision_mask = 256
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("CircleShape2D_45y16")
+
+[connection signal="area_entered" from="Area2D" to="." method="_on_area_2d_area_entered"]
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]

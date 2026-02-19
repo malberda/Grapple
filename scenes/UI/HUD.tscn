@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://dtmvq8gm3d1um"]
+
+[ext_resource type="Script" uid="uid://c1h0e150ui7ch" path="res://scenes/UI/hud.gd" id="1_5fyfn"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_5fyfn")
+
+[node name="SaveSceneButton" type="Button" parent="."]
+offset_left = 1408.0
+offset_top = 896.0
+offset_right = 1920.0
+offset_bottom = 1024.0
+text = "Save Scene"
